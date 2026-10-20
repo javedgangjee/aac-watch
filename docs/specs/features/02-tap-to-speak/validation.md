@@ -73,3 +73,29 @@ The expected result is that the yes screen shows at full brightness and the watc
 1. Do feature 1 checks 5 and 8 again.
 
 The expected result is the same as in feature 1. In check 8, the tap at 1 minute 30 seconds also speaks the word, and the next switch comes about 5 seconds after the word ends.
+
+## Results
+
+The checks ran on 2026-10-19 on branch `feature/02-tap-to-speak`.
+
+| Check | Result | Summary |
+|---|---|---|
+| 1 | Pass | Unity ran 21 tests with 0 failures and 0 ignored. |
+| 2 | Pass | The script exited with no error. The file `yes.pcm` has 21194 bytes and `no.pcm` has 18240 bytes. |
+| 3 | Pass | The build ended with no errors, and the log shows the step "Making the yes and no clips with say". The 15 warnings come from ESP-IDF and LVGL code, and none come from project code. |
+| 4 | Pass | The user reported a pass. |
+| 5 | Pass | The user reported a pass. |
+| 6 | Pass | The user reported a pass. |
+| 7 | Pass | The user reported a pass. |
+| 8 | Pass | The user reported a pass. |
+| 9 | Pass | The user reported a pass. |
+
+### Requirement coverage
+
+Each item in requirements.md has a passing check, except for the items below. I checked these items by reading the code, and each one is met.
+
+- Item 9 under "From the specs" has no check that names it. The file `main/idf_component.yml` lists `espressif/esp_codec_dev` at `~1.5`, and `dependencies.lock` locks version 1.5.11. Check 3 builds with it.
+- Item 3 under "Not covered by the specs" has no check that measures the volume. The file `main/audio.c` sets the volume to 90. Check 4 confirms only that the word is easy to hear.
+- Item 5 under "Not covered by the specs" has no check for a build without `say` or Python 3.13. The file `main/CMakeLists.txt` stops the build when Python 3.13 is missing, and `tools/make_clips.py` exits with an error when `say` is missing.
+- Item 9 under "Not covered by the specs" has no check that the codec opens only once. The function `audio_init` in `main/audio.c` opens the codec, and `main/main.c` calls it once at start.
+- Item 10 under "Not covered by the specs" is checked for `tools/make_clips.py` by check 2. No check names `main/audio.c` or `main/audio.h`, but both files exist and check 3 builds them.

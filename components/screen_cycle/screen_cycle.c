@@ -5,6 +5,7 @@ void screen_cycle_init(screen_cycle_t *sc, screen_t first)
     sc->screen = first;
     sc->on = true;
     sc->speaking = false;
+    sc->period_ms = SCREEN_CYCLE_DEFAULT_PERIOD_MS;
     sc->cycle_ms = 0;
     sc->idle_ms = 0;
 }
@@ -29,8 +30,8 @@ bool screen_cycle_tick(screen_cycle_t *sc, uint32_t elapsed_ms)
     }
 
     sc->cycle_ms += elapsed_ms;
-    uint32_t switches = sc->cycle_ms / SCREEN_CYCLE_PERIOD_MS;
-    sc->cycle_ms %= SCREEN_CYCLE_PERIOD_MS;
+    uint32_t switches = sc->cycle_ms / sc->period_ms;
+    sc->cycle_ms %= sc->period_ms;
 
     /* An even number of switches ends on the same screen. */
     if (switches % 2 == 1) {
@@ -43,7 +44,9 @@ bool screen_cycle_tick(screen_cycle_t *sc, uint32_t elapsed_ms)
 screen_tap_t screen_cycle_tap(screen_cycle_t *sc)
 {
     if (!sc->on) {
+        uint32_t period_ms = sc->period_ms;
         screen_cycle_init(sc, SCREEN_YES);
+        sc->period_ms = period_ms;
         return SCREEN_TAP_WAKE;
     }
 
@@ -60,6 +63,12 @@ void screen_cycle_speak_done(screen_cycle_t *sc)
 
     /* The screen gets a full period after the word ends. */
     sc->speaking = false;
+    sc->cycle_ms = 0;
+}
+
+void screen_cycle_set_period(screen_cycle_t *sc, uint32_t period_ms)
+{
+    sc->period_ms = period_ms;
     sc->cycle_ms = 0;
 }
 

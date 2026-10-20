@@ -1,5 +1,5 @@
 #!/usr/bin/env python3.13
-"""Make the yes and no clips as raw 16-bit PCM with the macOS say command.
+"""Make the yes and no clips for each voice as raw 16-bit PCM with the macOS say command.
 
 Usage: make_clips.py <output folder>
 """
@@ -11,7 +11,11 @@ import sys
 import tempfile
 import wave
 
-VOICE = "Samantha"
+# The voice key is in the clip file name. The value is the say voice name.
+VOICES = {
+    "samantha": "Samantha",
+    "reed": "Reed (English (US))",
+}
 RATE = 22050
 WORDS = ("yes", "no")
 
@@ -23,13 +27,13 @@ def fail(message: str) -> None:
     sys.exit(1)
 
 
-def make_clip(word: str, temp_dir: pathlib.Path, out_dir: pathlib.Path) -> None:
-    wav_path = temp_dir / f"{word}.wav"
+def make_clip(word: str, voice: str, temp_dir: pathlib.Path, out_dir: pathlib.Path) -> None:
+    wav_path = temp_dir / f"{word}_{voice}.wav"
     try:
         subprocess.run(
             [
                 "say",
-                "-v", VOICE,
+                "-v", VOICES[voice],
                 "-o", str(wav_path),
                 "--file-format=WAVE",
                 f"--data-format=LEI16@{RATE}",
@@ -40,7 +44,10 @@ def make_clip(word: str, temp_dir: pathlib.Path, out_dir: pathlib.Path) -> None:
     except FileNotFoundError:
         fail("The say command is missing. The clips must be made on macOS.")
     except subprocess.CalledProcessError as e:
-        fail(f"The say command failed for {word!r} with exit code {e.returncode}.")
+        fail(
+            f"The say command failed for {word!r} in the {VOICES[voice]} voice "
+            f"with exit code {e.returncode}."
+        )
 
     with wave.open(str(wav_path), "rb") as wav:
         channels = wav.getnchannels()
@@ -53,7 +60,7 @@ def make_clip(word: str, temp_dir: pathlib.Path, out_dir: pathlib.Path) -> None:
             )
         frames = wav.readframes(wav.getnframes())
 
-    pcm_path = out_dir / f"{word}.pcm"
+    pcm_path = out_dir / f"{word}_{voice}.pcm"
     pcm_path.write_bytes(frames)
     log.info("Wrote %s with %d bytes.", pcm_path, len(frames))
 
@@ -66,8 +73,9 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     with tempfile.TemporaryDirectory() as temp:
-        for word in WORDS:
-            make_clip(word, pathlib.Path(temp), out_dir)
+        for voice in VOICES:
+            for word in WORDS:
+                make_clip(word, voice, pathlib.Path(temp), out_dir)
 
 
 if __name__ == "__main__":

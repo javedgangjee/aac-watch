@@ -14,7 +14,7 @@ The Waveshare example `examples/esp-idf/02_lvgl_demo_v9` in the board repo is th
 
 ## Font
 
-The words use Montserrat Bold at font size 160, which makes the capital letters about 112 pixels high. The `lv_font_conv` tool makes the font file once through Node and `npx`, and the file `main/font_yes_no_160.c` is checked in. The font file must not be compressed. The project draws with two LVGL threads, and LVGL decodes compressed glyphs with one shared state, so compressed letters come out jumbled.
+The words use Montserrat Bold at font size 160, which makes the capital letters about 112 pixels high. The `lv_font_conv` tool makes the font file once through Node and `npx`, and the file `main/font_yes_no_160.c` is checked in. The settings screen uses Atkinson Hyperlegible, which is made the same way into `main/font_settings_28.c` and `main/font_settings_48.c`. The font files must not be compressed. The project draws with two LVGL threads, and LVGL decodes compressed glyphs with one shared state, so compressed letters come out jumbled.
 
 ## Audio clips
 

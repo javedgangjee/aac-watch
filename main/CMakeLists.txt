@@ -1,5 +1,6 @@
 idf_component_register(
-    SRCS main.c ui.c audio.c font_yes_no_160.c
+    SRCS main.c ui.c ui_settings.c audio.c settings_store.c
+         font_yes_no_160.c font_settings_28.c font_settings_48.c
     INCLUDE_DIRS .)
 
 # The clips are made with the macOS say command on every clean build and are not checked in.
@@ -9,17 +10,21 @@ if(NOT PYTHON313)
 endif()
 
 set(CLIP_SCRIPT ${PROJECT_DIR}/tools/make_clips.py)
-set(CLIP_YES ${CMAKE_CURRENT_BINARY_DIR}/yes.pcm)
-set(CLIP_NO ${CMAKE_CURRENT_BINARY_DIR}/no.pcm)
+set(CLIPS
+    ${CMAKE_CURRENT_BINARY_DIR}/yes_samantha.pcm
+    ${CMAKE_CURRENT_BINARY_DIR}/no_samantha.pcm
+    ${CMAKE_CURRENT_BINARY_DIR}/yes_reed.pcm
+    ${CMAKE_CURRENT_BINARY_DIR}/no_reed.pcm)
 
 add_custom_command(
-    OUTPUT ${CLIP_YES} ${CLIP_NO}
+    OUTPUT ${CLIPS}
     COMMAND ${PYTHON313} ${CLIP_SCRIPT} ${CMAKE_CURRENT_BINARY_DIR}
     DEPENDS ${CLIP_SCRIPT}
     COMMENT "Making the yes and no clips with say"
     VERBATIM)
-add_custom_target(clips DEPENDS ${CLIP_YES} ${CLIP_NO})
+add_custom_target(clips DEPENDS ${CLIPS})
 add_dependencies(${COMPONENT_LIB} clips)
 
-target_add_binary_data(${COMPONENT_LIB} ${CLIP_YES} BINARY)
-target_add_binary_data(${COMPONENT_LIB} ${CLIP_NO} BINARY)
+foreach(clip ${CLIPS})
+    target_add_binary_data(${COMPONENT_LIB} ${clip} BINARY)
+endforeach()

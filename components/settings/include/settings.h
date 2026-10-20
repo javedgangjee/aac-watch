@@ -1,0 +1,52 @@
+#pragma once
+
+#include <stdbool.h>
+#include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define SETTINGS_CYCLE_MIN_S     3
+#define SETTINGS_CYCLE_MAX_S     15
+#define SETTINGS_CYCLE_STEP_S    1
+#define SETTINGS_CYCLE_DEFAULT_S 5
+
+/* The volume is on the codec scale of 0 to 100. */
+#define SETTINGS_VOLUME_MIN     10
+#define SETTINGS_VOLUME_MAX     100
+#define SETTINGS_VOLUME_STEP    10
+#define SETTINGS_VOLUME_DEFAULT 90
+
+typedef enum {
+    SETTINGS_VOICE_SAMANTHA,
+    SETTINGS_VOICE_REED,
+} settings_voice_t;
+
+#define SETTINGS_VOICE_DEFAULT SETTINGS_VOICE_SAMANTHA
+
+typedef struct {
+    settings_voice_t voice;
+    uint8_t cycle_s;
+    uint8_t volume;
+} settings_t;
+
+/* Set the voice, the cycle time, and the volume to their defaults. */
+void settings_defaults(settings_t *s);
+
+/* Move the cycle time one step up for dir +1 or down for dir -1, and stay inside the limits.
+ * Return true if the value changed. */
+bool settings_cycle_step(settings_t *s, int dir);
+
+/* Move the volume one step up for dir +1 or down for dir -1, and stay inside the limits.
+ * Return true if the value changed. */
+bool settings_volume_step(settings_t *s, int dir);
+
+/* Set each field that is out of range to its default. Return true if a field changed. */
+bool settings_sanitize(settings_t *s);
+
+uint32_t settings_cycle_ms(const settings_t *s);
+
+#ifdef __cplusplus
+}
+#endif

@@ -14,7 +14,7 @@ The screens switch at a set cycle time, which is 5 seconds by default. When the 
 
 The screen turns off after 2 minutes with no tap. A tap on the dark screen turns it back on at the yes screen and does not speak. A tap on the lit screen restarts the 2 minute count.
 
-The watch also has a settings screen, which a person opens with the buttons on the side of the watch. On it, the person sets the voice, the cycle time, and the speaker volume. The voice is a female voice or a male voice.
+The watch also has a settings screen, which a person opens with a swipe down from the top edge of the screen. On it, the person sets the voice, the cycle time, and the speaker volume. The voice is Samantha, a female voice, or Reed, a male voice. A swipe up from the bottom edge or a Done button goes back to the yes and no screens.
 
 ## Hardware
 

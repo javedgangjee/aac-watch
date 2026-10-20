@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-set(EXTRA_COMPONENT_DIRS ../../components/screen_cycle)
+set(EXTRA_COMPONENT_DIRS ../../components/screen_cycle ../../components/settings)
 set(COMPONENTS main)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)

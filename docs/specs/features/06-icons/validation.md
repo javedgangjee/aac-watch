@@ -99,3 +99,21 @@ The expected result is that the yes screen shows with no icon. The settings scre
 2. Do feature 5 checks 4, 6, 7, 9, and 10 again.
 
 The expected result is the same as in feature 5, with the icons in place.
+
+## Results
+
+The checks ran on 2026-10-20.
+
+| Check | Result | Summary |
+|---|---|---|
+| 1 | Pass | Unity ran 60 tests with 0 failures, and cases S17 to S20 pass. |
+| 2 | Pass | The count is 1 for `main/font_icons_150.c` and 1 for `main/font_icons_80.c`. |
+| 3 | Pass | The build ends with no errors. The 15 warnings all come from ESP-IDF and LVGL code. |
+| 4 to 13 | Pass | The user ran each manual check on the watch after an erase and a flash, and each one passed. |
+
+Some items in requirements.md have no check in this file.
+
+- Item 3 of "Not covered by the specs" says the list starts at the top each time the settings screen opens. Check 6 shows the top only on the first open.
+- Item 8 of "Not covered by the specs" says a watch with saved settings from feature 5 keeps its other settings. Every manual check started from an erased flash, so no check loads settings from feature 5.
+- Items 10 and 17 of "Not covered by the specs" cover the files in `tools/fonts/` and the README text. No check covers them, but a read of the repo shows the woff file, its license, the icons setting, the scroll, and the Font Awesome credit in place.
+- Item 18 of "Not covered by the specs" moves to the replan step and needs no check here.

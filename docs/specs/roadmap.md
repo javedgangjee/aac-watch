@@ -12,6 +12,6 @@
    The goal is a settings screen where a person sets the voice, the cycle time, and the speaker volume.
    This feature covers the settings screen, the male voice clips made with `say`, and the three settings. The voice is female or male, and the cycle time is 5 seconds by default. It also covers the swipe down from the top that opens the settings screen and how a person goes back to the yes and no screens. The swipe replaced the side buttons during planning.
 
-4. **Cleanup for distribution.** Status is planned.
+4. **Cleanup for distribution.** Status is in progress.
    The goal is a project that another person can get, build, and run from the repo.
-   This feature covers a license file and a README that says what the project does and how to build and flash it.
+   This feature covers a license file and a README that says what the project does and how to build and flash it. It also renames the project from yes-no to aac-watch, which the user added during planning.

@@ -1,6 +1,6 @@
 # Roadmap
 
-1. **Cycling screens.** Status is planned.
+1. **Cycling screens.** Status is in progress.
    The goal is a watch that switches between the yes screen and the no screen every 5 seconds.
    This feature covers the green yes screen, the red no screen, and the 5 second switch. It also sets up the ESP-IDF project from the Waveshare board drivers.
 

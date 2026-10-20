@@ -27,6 +27,13 @@ This file records the changes to aac-watch that a person who reads or runs the p
 - Feature 3 adds the Atkinson Hyperlegible font for the settings screen, with the source TTF files and the SIL Open Font License in `tools/fonts/`.
 - Feature 4 adds a `LICENSE` file with the GNU General Public License version 3.0 text, and the project is under GPL 3.0 or any later version.
 - Feature 4 adds a README that says what the watch does and names the hardware. It also says what the build machine needs, how to build, flash, and use the watch, and gives the license.
+- Feature 5 adds a split mode, which shows "Yes" on green in the top half of the screen and "No" on red in the bottom half, with a black band between them, and the screen does not switch.
+- Feature 5 makes a tap on a half speak the word of that half, and a tap on the other half while a word plays stops the clip and plays the new word.
+- Feature 5 makes a tap on the band of the lit screen do nothing, and it does not restart the 2 minute count.
+- Feature 5 turns the split screen off after 2 minutes with no tap, and a tap on the dark screen turns it back on at the split screen and does not speak.
+- Feature 5 adds a Mode row at the top of the settings screen with a Cycle button and a Split button, and the default is Cycle.
+- Feature 5 hides the cycle time row on the settings screen while Split is lit.
+- Feature 5 saves the mode in NVS with the key `mode`, so a watch with saved settings from feature 3 starts in cycle mode and keeps its other settings.
 
 ### Changed
 
@@ -37,6 +44,8 @@ This file records the changes to aac-watch that a person who reads or runs the p
 - Feature 3 makes `audio_init` take the start volume and makes `audio_play` take the voice.
 - Feature 4 renames the project from yes-no to aac-watch, so the firmware file is now `build/aac_watch.bin`.
 - Feature 4 changes the settings namespace in NVS from `yes_no` to `aac_watch`, so a watch that already has saved settings goes back to the defaults one time.
+- Feature 5 makes every button on the settings screen 48 pixels high in place of 56, so the four rows and Done fit on the screen.
+- Feature 5 makes the README describe the two modes and the four settings, and the host tests now number 56.
 
 ### Removed
 

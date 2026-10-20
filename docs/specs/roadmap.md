@@ -8,7 +8,7 @@
    The goal is a watch that speaks the word on the screen when the user taps it.
    This feature covers the clips made with `say`, playback through the ES8311 codec and speaker, and the tap. It also covers the timer rule, which holds the screen while the word plays and then gives it a full 5 seconds. A tap on the dark screen still wakes the screen and does not speak.
 
-3. **Settings screen.** Status is in progress.
+3. **Settings screen.** Status is done.
    The goal is a settings screen where a person sets the voice, the cycle time, and the speaker volume.
    This feature covers the settings screen, the male voice clips made with `say`, and the three settings. The voice is female or male, and the cycle time is 5 seconds by default. It also covers the swipe down from the top that opens the settings screen and how a person goes back to the yes and no screens. The swipe replaced the side buttons during planning.
 

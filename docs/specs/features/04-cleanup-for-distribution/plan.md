@@ -17,6 +17,7 @@
 
 4. Write the README.
    - This step creates `README.md`.
+   - The README follows requirements.md item 10. Each section is a few short sentences or a short list of commands. After it is written, the `deslopificate` skill checks it for AI tells and tropes.
    - The title is `# aac-watch`. The first section says in a few sentences what the watch does, from mission.md.
    - The hardware section names the Waveshare ESP32-S3-Touch-AMOLED-2.06.
    - The build machine section lists macOS, ESP-IDF v6.1, Python 3.13 as `python3.13`, and the `say` command with the Samantha and Reed voices. It says that `say -v '?'` lists the installed voices, and that the build fails if Python 3.13 or `say` is missing.

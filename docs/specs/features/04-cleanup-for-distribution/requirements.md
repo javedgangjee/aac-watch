@@ -21,3 +21,4 @@ The user confirmed each item below during planning.
 7. **Confirmed.** The file `.vscode/settings.json` leaves git with `git rm --cached`, and `.vscode/` goes into `.gitignore`. The local copy stays. The plan also adds `.ruff_cache/` to `.gitignore`, because the folder is in the repo root and is not ignored.
 8. **Confirmed.** The README names the Montserrat font and its SIL Open Font License and links to the license. No Montserrat license file is added.
 9. **Confirmed.** The README has these sections. They are what the project does, the hardware, what the build machine needs, how to build and flash, how to use the watch, and the license.
+10. **Confirmed.** The README is short and easy to read. It uses short sentences and plain words. It has no AI tells or tropes, such as em dashes, en dashes, groups of three for effect, hollow intensifiers, "X, not Y" framing, "not just X" framing, rhetorical questions, or a closing summary.

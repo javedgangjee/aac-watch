@@ -38,6 +38,8 @@ The check passes when the output is `.vscode/settings.json`, then `.ruff_cache`,
 
 The expected result is that the title is aac-watch, and the README has a section on what the project does, the hardware, the build machine, how to build and flash, how to use the watch, and the license. The license section has the line "Copyright (C) 2026 Javed Gangjee", the GNU notice for version 3 or any later version, and the Montserrat license link. The README does not use the name yes-no.
 
+The README is short and easy to read. It has no em dashes, en dashes, groups of three for effect, hollow intensifiers, "X, not Y" framing, "not just X" framing, rhetorical questions, or closing summary. The command `grep -n -E '—|–' README.md` prints nothing.
+
 ### Check 7. The README build and flash steps work as written.
 
 1. Open a new terminal and go to the clean copy from check 2.

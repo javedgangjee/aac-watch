@@ -22,6 +22,6 @@
    The goal is a split screen view that shows the yes screen on the top half and the no screen on the bottom half at the same time.
    This feature covers the split screen view, the tap on each half that speaks its word, and a mode setting on the settings screen, where a person picks the cycle mode or the split mode.
 
-6. **Icons.** Status is planned.
+6. **Icons.** Status is in progress.
    The goal is a check mark icon on the yes screen and an X icon on the no screen.
    This feature covers the two icons and a setting on the settings screen that shows or hides them. In cycle mode, the icon sits above the word, as in a typical AAC app. In split mode, the icon sits on the same line as the word.

@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.22)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
-project(yes_no)
+project(aac_watch)
 
 idf_build_get_property(build_components BUILD_COMPONENTS)
 if("lvgl__lvgl" IN_LIST build_components)

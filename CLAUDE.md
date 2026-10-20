@@ -1,4 +1,4 @@
-# yes-no
+# aac-watch
 
 The files in `docs/specs/` are the source of truth for what to build. Read `docs/specs/mission.md`, `docs/specs/tech-stack.md`, and `docs/specs/roadmap.md` before any work. Each feature has its own folder in `docs/specs/features/`.
 

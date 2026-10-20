@@ -4,7 +4,7 @@
 #include "nvs_flash.h"
 #include "settings_store.h"
 
-#define STORE_NAMESPACE "yes_no"
+#define STORE_NAMESPACE "aac_watch"
 #define KEY_VOICE       "voice"
 #define KEY_CYCLE_S     "cycle_s"
 #define KEY_VOLUME      "volume"

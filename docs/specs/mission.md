@@ -1,6 +1,6 @@
 # Mission
 
-Yes-no is a simple AAC app on a wrist watch. It lets a person who cannot speak answer yes or no questions out loud.
+aac-watch is a simple AAC app on a wrist watch. It lets a person who cannot speak answer yes or no questions out loud.
 
 ## Who uses it
 

@@ -1,6 +1,6 @@
 # Changelog
 
-This file records the changes to yes-no that a person who reads or runs the project would notice.
+This file records the changes to aac-watch that a person who reads or runs the project would notice.
 
 ## Unreleased
 

@@ -115,3 +115,17 @@ The expected result is that the split screen shows. The settings screen shows "S
 2. Do feature 3 checks 5 to 10 again.
 
 The expected result is the same as in feature 3. The 48 pixel buttons are easy to tap.
+
+## Results on 2026-10-20
+
+Check 1 passes. Unity ran 56 tests with 0 failures, which include cases 28 to 40 and S13 to S16.
+
+Check 2 passes. The firmware build for esp32s3 ended with no errors, and the project code gave no warnings.
+
+Checks 3 to 12 pass. The user ran each one on the watch after `idf.py erase-flash` and `idf.py flash`.
+
+Each item in requirements.md has at least one passing check, with three gaps.
+
+- No check proves that a tap on the band of the lit screen leaves the 2 minute count as it is, or that a tap on the band of the dark screen wakes it. Check 7 proves only that the band tap makes no sound.
+- No check starts the watch with saved settings from feature 3. Case S14 and check 11 cover a mode that is out of range and a saved split mode.
+- No check covers the README text about the split mode and the mode setting.

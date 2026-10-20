@@ -63,3 +63,19 @@ The expected result is that step 3 shows the defaults, which are Samantha lit, 5
 1. Do each action that the use section of the README lists, in the order it lists them.
 
 The expected result is that the watch does what the README says for each action.
+
+## Results
+
+The checks ran on 2026-10-20.
+
+1. Check 1 passes. Unity ran 39 tests with 0 failures.
+2. Check 2 passes. The clean copy built with no errors, the log shows that `make_clips` wrote the four clips, and `build/aac_watch.bin` exists.
+3. Check 3 passes by the user's decision. The command prints five lines, which are in the feature 04 folder and in line 17 of roadmap.md. Each line describes the rename, and no code or user document uses the old name.
+4. Check 4 passes. The command prints only `same`.
+5. Check 5 passes. The first command prints nothing, and the output is `.vscode/settings.json`, `.ruff_cache`, and `kept`.
+6. Check 6 passes. The user reviewed the README.
+7. Check 7 passes. The user followed the README build and flash steps.
+8. Check 8 passes. The user confirmed the new settings namespace on the watch.
+9. Check 9 passes. The user confirmed that the README use section matches the watch.
+
+Item 3 of "Not covered by the specs" in requirements.md, which says the source files get no license header, has no check in this file.

@@ -6,7 +6,7 @@ The watch switches between a green screen that says "Yes" and a red screen that 
 
 ## Hardware
 
-The app runs on the Waveshare ESP32-S3-Touch-AMOLED-2.06 watch board.
+Waveshare ESP32-S3-Touch-AMOLED-2.06 watch board.
 
 ## What the build machine needs
 

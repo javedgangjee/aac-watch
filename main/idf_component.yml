@@ -5,3 +5,5 @@ dependencies:
   lvgl/lvgl:
     version: "9.5.0"
     public: true
+  espressif/esp_codec_dev:
+    version: "~1.5"

@@ -104,9 +104,10 @@ static void test_case_11_off_screen_ignores_ticks(void)
 static void test_case_12_tap_on_dark_screen(void)
 {
     tick_until_off();
-    TEST_ASSERT_TRUE(screen_cycle_tap(&sc));
+    TEST_ASSERT_EQUAL(SCREEN_TAP_WAKE, screen_cycle_tap(&sc));
     TEST_ASSERT_TRUE(screen_cycle_is_on(&sc));
     TEST_ASSERT_EQUAL(SCREEN_YES, screen_cycle_current(&sc));
+    TEST_ASSERT_FALSE(screen_cycle_is_speaking(&sc));
     TEST_ASSERT_FALSE(screen_cycle_tick(&sc, 4999));
     TEST_ASSERT_EQUAL(SCREEN_YES, screen_cycle_current(&sc));
     TEST_ASSERT_TRUE(screen_cycle_tick(&sc, 1));
@@ -116,20 +117,93 @@ static void test_case_12_tap_on_dark_screen(void)
 static void test_case_13_tap_restarts_off_count(void)
 {
     screen_cycle_tick(&sc, 119000);
-    TEST_ASSERT_FALSE(screen_cycle_tap(&sc));
+    TEST_ASSERT_EQUAL(SCREEN_TAP_SPEAK, screen_cycle_tap(&sc));
     screen_cycle_tick(&sc, 119999);
     TEST_ASSERT_TRUE(screen_cycle_is_on(&sc));
     TEST_ASSERT_TRUE(screen_cycle_tick(&sc, 1));
     TEST_ASSERT_FALSE(screen_cycle_is_on(&sc));
+    TEST_ASSERT_FALSE(screen_cycle_is_speaking(&sc));
 }
 
-static void test_case_14_tap_keeps_switch_timing(void)
+static void test_case_14_full_period_after_word(void)
 {
     screen_cycle_tick(&sc, 3000);
-    TEST_ASSERT_FALSE(screen_cycle_tap(&sc));
+    TEST_ASSERT_EQUAL(SCREEN_TAP_SPEAK, screen_cycle_tap(&sc));
+    screen_cycle_speak_done(&sc);
+    TEST_ASSERT_FALSE(screen_cycle_tick(&sc, 4999));
     TEST_ASSERT_EQUAL(SCREEN_YES, screen_cycle_current(&sc));
+    TEST_ASSERT_TRUE(screen_cycle_tick(&sc, 1));
+    TEST_ASSERT_EQUAL(SCREEN_NO, screen_cycle_current(&sc));
+}
+
+static void test_case_15_tap_starts_speaking(void)
+{
+    TEST_ASSERT_EQUAL(SCREEN_TAP_SPEAK, screen_cycle_tap(&sc));
+    TEST_ASSERT_TRUE(screen_cycle_is_speaking(&sc));
+    TEST_ASSERT_EQUAL(SCREEN_YES, screen_cycle_current(&sc));
+}
+
+static void test_case_16_no_switch_while_speaking(void)
+{
+    screen_cycle_tick(&sc, 3000);
+    screen_cycle_tap(&sc);
+    TEST_ASSERT_FALSE(screen_cycle_tick(&sc, 10000));
+    TEST_ASSERT_EQUAL(SCREEN_YES, screen_cycle_current(&sc));
+    TEST_ASSERT_TRUE(screen_cycle_is_speaking(&sc));
+}
+
+static void test_case_17_hold_then_full_period(void)
+{
+    screen_cycle_tick(&sc, 4000);
+    screen_cycle_tap(&sc);
+    TEST_ASSERT_FALSE(screen_cycle_tick(&sc, 2000));
+    TEST_ASSERT_EQUAL(SCREEN_YES, screen_cycle_current(&sc));
+    screen_cycle_speak_done(&sc);
+    TEST_ASSERT_FALSE(screen_cycle_tick(&sc, 4999));
+    TEST_ASSERT_EQUAL(SCREEN_YES, screen_cycle_current(&sc));
+    TEST_ASSERT_TRUE(screen_cycle_tick(&sc, 1));
+    TEST_ASSERT_EQUAL(SCREEN_NO, screen_cycle_current(&sc));
+}
+
+static void test_case_18_tap_while_speaking(void)
+{
+    TEST_ASSERT_EQUAL(SCREEN_TAP_SPEAK, screen_cycle_tap(&sc));
+    screen_cycle_tick(&sc, 200);
+    TEST_ASSERT_EQUAL(SCREEN_TAP_SPEAK, screen_cycle_tap(&sc));
+    TEST_ASSERT_TRUE(screen_cycle_is_speaking(&sc));
+    screen_cycle_speak_done(&sc);
+    TEST_ASSERT_FALSE(screen_cycle_is_speaking(&sc));
+    TEST_ASSERT_FALSE(screen_cycle_tick(&sc, 4999));
+    TEST_ASSERT_TRUE(screen_cycle_tick(&sc, 1));
+    TEST_ASSERT_EQUAL(SCREEN_NO, screen_cycle_current(&sc));
+}
+
+static void test_case_19_speak_done_without_tap(void)
+{
+    screen_cycle_tick(&sc, 3000);
+    screen_cycle_speak_done(&sc);
     TEST_ASSERT_TRUE(screen_cycle_tick(&sc, 2000));
     TEST_ASSERT_EQUAL(SCREEN_NO, screen_cycle_current(&sc));
+}
+
+static void test_case_20_off_while_speaking(void)
+{
+    screen_cycle_tap(&sc);
+    TEST_ASSERT_TRUE(screen_cycle_tick(&sc, 120000));
+    TEST_ASSERT_FALSE(screen_cycle_is_on(&sc));
+    TEST_ASSERT_FALSE(screen_cycle_is_speaking(&sc));
+    screen_cycle_speak_done(&sc);
+    TEST_ASSERT_FALSE(screen_cycle_tick(&sc, 10000));
+    TEST_ASSERT_FALSE(screen_cycle_is_on(&sc));
+}
+
+static void test_case_21_wake_tap_then_speak_tap(void)
+{
+    tick_until_off();
+    TEST_ASSERT_EQUAL(SCREEN_TAP_WAKE, screen_cycle_tap(&sc));
+    TEST_ASSERT_FALSE(screen_cycle_is_speaking(&sc));
+    TEST_ASSERT_EQUAL(SCREEN_TAP_SPEAK, screen_cycle_tap(&sc));
+    TEST_ASSERT_TRUE(screen_cycle_is_speaking(&sc));
 }
 
 void app_main(void)
@@ -148,6 +222,13 @@ void app_main(void)
     RUN_TEST(test_case_11_off_screen_ignores_ticks);
     RUN_TEST(test_case_12_tap_on_dark_screen);
     RUN_TEST(test_case_13_tap_restarts_off_count);
-    RUN_TEST(test_case_14_tap_keeps_switch_timing);
+    RUN_TEST(test_case_14_full_period_after_word);
+    RUN_TEST(test_case_15_tap_starts_speaking);
+    RUN_TEST(test_case_16_no_switch_while_speaking);
+    RUN_TEST(test_case_17_hold_then_full_period);
+    RUN_TEST(test_case_18_tap_while_speaking);
+    RUN_TEST(test_case_19_speak_done_without_tap);
+    RUN_TEST(test_case_20_off_while_speaking);
+    RUN_TEST(test_case_21_wake_tap_then_speak_tap);
     exit(UNITY_END());
 }

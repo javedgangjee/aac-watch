@@ -2,6 +2,7 @@
 #include "bsp/esp-bsp.h"
 #include "bsp/display.h"
 #include "screen_cycle.h"
+#include "audio.h"
 #include "ui.h"
 
 #define TICK_PERIOD_MS 50
@@ -47,16 +48,28 @@ static void on_tick(lv_timer_t *timer)
 
 static void on_tap(void)
 {
-    if (screen_cycle_tap(&s_cycle)) {
-        /* Time from before the wake must not count toward the first switch. */
-        s_last_tick = lv_tick_get();
-        apply_state();
+    if (screen_cycle_tap(&s_cycle) == SCREEN_TAP_SPEAK) {
+        audio_play(screen_cycle_current(&s_cycle));
+        return;
     }
+
+    /* Time from before the wake must not count toward the first switch. */
+    s_last_tick = lv_tick_get();
+    apply_state();
+}
+
+/* Runs in the playback task, so it takes the display lock. */
+static void on_speak_done(void)
+{
+    bsp_display_lock(0);
+    screen_cycle_speak_done(&s_cycle);
+    bsp_display_unlock();
 }
 
 void app_main(void)
 {
     bsp_display_start();
+    ESP_ERROR_CHECK(audio_init(on_speak_done));
 
     bsp_display_lock(0);
 

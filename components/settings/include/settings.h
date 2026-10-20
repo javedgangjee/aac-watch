@@ -25,13 +25,21 @@ typedef enum {
 
 #define SETTINGS_VOICE_DEFAULT SETTINGS_VOICE_SAMANTHA
 
+typedef enum {
+    SETTINGS_MODE_CYCLE,
+    SETTINGS_MODE_SPLIT,
+} settings_mode_t;
+
+#define SETTINGS_MODE_DEFAULT SETTINGS_MODE_CYCLE
+
 typedef struct {
+    settings_mode_t mode;
     settings_voice_t voice;
     uint8_t cycle_s;
     uint8_t volume;
 } settings_t;
 
-/* Set the voice, the cycle time, and the volume to their defaults. */
+/* Set the mode, the voice, the cycle time, and the volume to their defaults. */
 void settings_defaults(settings_t *s);
 
 /* Move the cycle time one step up for dir +1 or down for dir -1, and stay inside the limits.

@@ -268,6 +268,110 @@ static void test_case_27_off_time_with_long_period(void)
     TEST_ASSERT_FALSE(screen_cycle_is_on(&sc));
 }
 
+static void test_case_28_split_off_at_start(void)
+{
+    TEST_ASSERT_FALSE(screen_cycle_is_split(&sc));
+}
+
+static void test_case_29_split_does_not_switch(void)
+{
+    screen_cycle_set_split(&sc, true);
+    TEST_ASSERT_FALSE(screen_cycle_tick(&sc, 10000));
+    TEST_ASSERT_EQUAL(SCREEN_YES, screen_cycle_current(&sc));
+    TEST_ASSERT_TRUE(screen_cycle_is_on(&sc));
+}
+
+static void test_case_30_split_off_after_two_minutes(void)
+{
+    screen_cycle_set_split(&sc, true);
+    screen_cycle_tick(&sc, 119999);
+    TEST_ASSERT_TRUE(screen_cycle_is_on(&sc));
+    TEST_ASSERT_TRUE(screen_cycle_tick(&sc, 1));
+    TEST_ASSERT_FALSE(screen_cycle_is_on(&sc));
+}
+
+static void test_case_31_split_wake_keeps_split(void)
+{
+    screen_cycle_set_split(&sc, true);
+    screen_cycle_tick(&sc, 120000);
+    TEST_ASSERT_EQUAL(SCREEN_TAP_WAKE, screen_cycle_tap(&sc));
+    TEST_ASSERT_TRUE(screen_cycle_is_on(&sc));
+    TEST_ASSERT_TRUE(screen_cycle_is_split(&sc));
+}
+
+static void test_case_32_split_tap_restarts_off_count(void)
+{
+    screen_cycle_set_split(&sc, true);
+    screen_cycle_tick(&sc, 60000);
+    TEST_ASSERT_EQUAL(SCREEN_TAP_SPEAK, screen_cycle_tap(&sc));
+    screen_cycle_tick(&sc, 119999);
+    TEST_ASSERT_TRUE(screen_cycle_is_on(&sc));
+    TEST_ASSERT_TRUE(screen_cycle_tick(&sc, 1));
+    TEST_ASSERT_FALSE(screen_cycle_is_on(&sc));
+}
+
+static void test_case_33_split_no_switch_after_word(void)
+{
+    screen_cycle_set_split(&sc, true);
+    screen_cycle_tap(&sc);
+    screen_cycle_speak_done(&sc);
+    TEST_ASSERT_FALSE(screen_cycle_tick(&sc, 10000));
+    TEST_ASSERT_EQUAL(SCREEN_YES, screen_cycle_current(&sc));
+}
+
+static void test_case_34_split_off_clears_switch_count(void)
+{
+    screen_cycle_set_split(&sc, true);
+    screen_cycle_tick(&sc, 3000);
+    screen_cycle_set_split(&sc, false);
+    TEST_ASSERT_FALSE(screen_cycle_tick(&sc, 4999));
+    TEST_ASSERT_EQUAL(SCREEN_YES, screen_cycle_current(&sc));
+    TEST_ASSERT_TRUE(screen_cycle_tick(&sc, 1));
+    TEST_ASSERT_EQUAL(SCREEN_NO, screen_cycle_current(&sc));
+}
+
+/* Check the word under a press at row y on a screen 502 pixels high. */
+static void assert_split_word(int32_t y, bool on_half, screen_t expected)
+{
+    screen_t word;
+    if (on_half) {
+        TEST_ASSERT_TRUE(screen_cycle_split_word(y, 502, &word));
+        TEST_ASSERT_EQUAL(expected, word);
+    } else {
+        TEST_ASSERT_FALSE(screen_cycle_split_word(y, 502, &word));
+    }
+}
+
+static void test_case_35_split_word_top_row(void)
+{
+    assert_split_word(0, true, SCREEN_YES);
+}
+
+static void test_case_36_split_word_last_yes_row(void)
+{
+    assert_split_word(245, true, SCREEN_YES);
+}
+
+static void test_case_37_split_word_first_band_row(void)
+{
+    assert_split_word(246, false, SCREEN_YES);
+}
+
+static void test_case_38_split_word_last_band_row(void)
+{
+    assert_split_word(255, false, SCREEN_YES);
+}
+
+static void test_case_39_split_word_first_no_row(void)
+{
+    assert_split_word(256, true, SCREEN_NO);
+}
+
+static void test_case_40_split_word_bottom_row(void)
+{
+    assert_split_word(501, true, SCREEN_NO);
+}
+
 void app_main(void)
 {
     UNITY_BEGIN();
@@ -298,6 +402,19 @@ void app_main(void)
     RUN_TEST(test_case_25_wake_keeps_period);
     RUN_TEST(test_case_26_full_period_after_word);
     RUN_TEST(test_case_27_off_time_with_long_period);
+    RUN_TEST(test_case_28_split_off_at_start);
+    RUN_TEST(test_case_29_split_does_not_switch);
+    RUN_TEST(test_case_30_split_off_after_two_minutes);
+    RUN_TEST(test_case_31_split_wake_keeps_split);
+    RUN_TEST(test_case_32_split_tap_restarts_off_count);
+    RUN_TEST(test_case_33_split_no_switch_after_word);
+    RUN_TEST(test_case_34_split_off_clears_switch_count);
+    RUN_TEST(test_case_35_split_word_top_row);
+    RUN_TEST(test_case_36_split_word_last_yes_row);
+    RUN_TEST(test_case_37_split_word_first_band_row);
+    RUN_TEST(test_case_38_split_word_last_band_row);
+    RUN_TEST(test_case_39_split_word_first_no_row);
+    RUN_TEST(test_case_40_split_word_bottom_row);
     run_settings_tests();
     exit(UNITY_END());
 }

@@ -123,6 +123,41 @@ static void test_case_s12_not_equal_one_field(void)
     TEST_ASSERT_FALSE(settings_equal(&a, &b));
 }
 
+static void test_case_s13_default_mode(void)
+{
+    settings_t s;
+    settings_defaults(&s);
+    TEST_ASSERT_EQUAL(SETTINGS_MODE_CYCLE, s.mode);
+}
+
+static void test_case_s14_sanitize_mode_out_of_range(void)
+{
+    settings_t s;
+    settings_defaults(&s);
+    s.mode = (settings_mode_t)2;
+    TEST_ASSERT_TRUE(settings_sanitize(&s));
+    TEST_ASSERT_EQUAL(SETTINGS_MODE_CYCLE, s.mode);
+}
+
+static void test_case_s15_sanitize_keeps_split(void)
+{
+    settings_t s;
+    settings_defaults(&s);
+    s.mode = SETTINGS_MODE_SPLIT;
+    TEST_ASSERT_FALSE(settings_sanitize(&s));
+    TEST_ASSERT_EQUAL(SETTINGS_MODE_SPLIT, s.mode);
+}
+
+static void test_case_s16_not_equal_mode(void)
+{
+    settings_t a;
+    settings_t b;
+    settings_defaults(&a);
+    b = a;
+    b.mode = SETTINGS_MODE_SPLIT;
+    TEST_ASSERT_FALSE(settings_equal(&a, &b));
+}
+
 void run_settings_tests(void)
 {
     RUN_TEST(test_case_s01_defaults);
@@ -137,4 +172,8 @@ void run_settings_tests(void)
     RUN_TEST(test_case_s10_sanitize_limits);
     RUN_TEST(test_case_s11_equal_defaults);
     RUN_TEST(test_case_s12_not_equal_one_field);
+    RUN_TEST(test_case_s13_default_mode);
+    RUN_TEST(test_case_s14_sanitize_mode_out_of_range);
+    RUN_TEST(test_case_s15_sanitize_keeps_split);
+    RUN_TEST(test_case_s16_not_equal_mode);
 }

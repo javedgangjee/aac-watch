@@ -5,6 +5,7 @@
 #include "settings_store.h"
 
 #define STORE_NAMESPACE "aac_watch"
+#define KEY_MODE        "mode"
 #define KEY_VOICE       "voice"
 #define KEY_CYCLE_S     "cycle_s"
 #define KEY_VOLUME      "volume"
@@ -51,6 +52,9 @@ void settings_store_load(settings_t *s)
         return;
     }
 
+    uint8_t mode = (uint8_t)s->mode;
+    read_u8(nvs, KEY_MODE, &mode);
+    s->mode = (settings_mode_t)mode;
     uint8_t voice = (uint8_t)s->voice;
     read_u8(nvs, KEY_VOICE, &voice);
     s->voice = (settings_voice_t)voice;
@@ -68,7 +72,10 @@ esp_err_t settings_store_save(const settings_t *s)
     nvs_handle_t nvs;
     ESP_RETURN_ON_ERROR(nvs_open(STORE_NAMESPACE, NVS_READWRITE, &nvs), TAG, "NVS open failed");
 
-    esp_err_t err = nvs_set_u8(nvs, KEY_VOICE, (uint8_t)s->voice);
+    esp_err_t err = nvs_set_u8(nvs, KEY_MODE, (uint8_t)s->mode);
+    if (err == ESP_OK) {
+        err = nvs_set_u8(nvs, KEY_VOICE, (uint8_t)s->voice);
+    }
     if (err == ESP_OK) {
         err = nvs_set_u8(nvs, KEY_CYCLE_S, s->cycle_s);
     }

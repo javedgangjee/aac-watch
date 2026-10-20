@@ -11,6 +11,7 @@ void screen_cycle_init(screen_cycle_t *sc, screen_t first, uint32_t period_ms)
     sc->screen = first;
     sc->on = true;
     sc->speaking = false;
+    sc->split = false;
     sc->period_ms = valid_period(period_ms);
     sc->cycle_ms = 0;
     sc->idle_ms = 0;
@@ -30,8 +31,8 @@ bool screen_cycle_tick(screen_cycle_t *sc, uint32_t elapsed_ms)
         return true;
     }
 
-    /* The screen holds while the word plays. */
-    if (sc->speaking) {
+    /* The screen holds while the word plays, and never switches in split mode. */
+    if (sc->speaking || sc->split) {
         return false;
     }
 
@@ -50,7 +51,9 @@ bool screen_cycle_tick(screen_cycle_t *sc, uint32_t elapsed_ms)
 screen_tap_t screen_cycle_tap(screen_cycle_t *sc)
 {
     if (!sc->on) {
+        bool split = sc->split;
         screen_cycle_init(sc, SCREEN_YES, sc->period_ms);
+        sc->split = split;
         return SCREEN_TAP_WAKE;
     }
 
@@ -74,6 +77,32 @@ void screen_cycle_set_period(screen_cycle_t *sc, uint32_t period_ms)
 {
     sc->period_ms = valid_period(period_ms);
     sc->cycle_ms = 0;
+}
+
+void screen_cycle_set_split(screen_cycle_t *sc, bool split)
+{
+    sc->split = split;
+    sc->cycle_ms = 0;
+}
+
+bool screen_cycle_is_split(const screen_cycle_t *sc)
+{
+    return sc->split;
+}
+
+bool screen_cycle_split_word(int32_t y, int32_t height, screen_t *word)
+{
+    int32_t band_top = (height - SCREEN_CYCLE_SPLIT_GAP) / 2;
+
+    if (y < band_top) {
+        *word = SCREEN_YES;
+        return true;
+    }
+    if (y < band_top + SCREEN_CYCLE_SPLIT_GAP) {
+        return false;
+    }
+    *word = SCREEN_NO;
+    return true;
 }
 
 screen_t screen_cycle_current(const screen_cycle_t *sc)

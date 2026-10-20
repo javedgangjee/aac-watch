@@ -48,15 +48,27 @@ If `idf.py` does not find the watch, give the port, for example `idf.py -p /dev/
 
 ## Use the watch
 
+The watch has two modes. The cycle mode is the default, and you pick the mode on the settings screen.
+
+In cycle mode, the watch works as described below.
+
 - The watch starts at the yes screen. It switches between the yes screen and the no screen every 5 seconds.
 - A tap on the screen speaks the word on that screen. The screen stays while the word plays, and then it stays for one more full cycle.
 - The screen turns off after 2 minutes with no tap. A tap on the dark screen turns it on at the yes screen and does not speak.
-- A swipe down from the top edge of the screen opens the settings screen.
 
-The settings screen has three settings.
+In split mode, the watch works as described below.
 
+- The top half of the screen shows "Yes" on green, and the bottom half shows "No" on red. A black band separates the halves. The screen does not switch.
+- A tap on a half speaks the word on that half. A tap on the band does nothing.
+- The screen turns off after 2 minutes with no tap. A tap on the dark screen turns it on at the split screen and does not speak.
+
+In both modes, a swipe down from the top edge of the screen opens the settings screen.
+
+The settings screen has four settings.
+
+- The mode is Cycle or Split. The default is Cycle.
 - The voice is Samantha or Reed.
-- The cycle time goes from 3 to 15 seconds in steps of 1 second. The default is 5 seconds.
+- The cycle time goes from 3 to 15 seconds in steps of 1 second. The default is 5 seconds. The settings screen hides the cycle time while the Split button is lit.
 - The volume goes from 10 to 100 in steps of 10. The default is 90.
 
 The watch saves the settings and keeps them after a restart. Each of these actions takes you back to the yes and no screens.

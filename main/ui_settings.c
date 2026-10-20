@@ -8,7 +8,7 @@ LV_FONT_DECLARE(font_settings_48);
 /* The screen has round corners, so the margin keeps the corner items inside the glass. */
 #define UI_MARGIN            44
 #define UI_NAME_GAP          6
-#define UI_BUTTON_H          56
+#define UI_BUTTON_H          48
 #define UI_STEP_BUTTON_W     88
 #define UI_RADIUS            16
 
@@ -23,8 +23,11 @@ LV_FONT_DECLARE(font_settings_48);
 #define UI_STATE_DIM         LV_STATE_USER_1
 
 static lv_obj_t *s_screen;
+static lv_obj_t *s_btn_cycle_mode;
+static lv_obj_t *s_btn_split_mode;
 static lv_obj_t *s_btn_samantha;
 static lv_obj_t *s_btn_reed;
+static lv_obj_t *s_cycle_group;
 static lv_obj_t *s_btn_cycle_down;
 static lv_obj_t *s_btn_cycle_up;
 static lv_obj_t *s_btn_volume_down;
@@ -51,14 +54,28 @@ static void set_enabled(lv_obj_t *btn, bool enabled)
     }
 }
 
+/* Light on_btn and clear off_btn. */
+static void set_lit(lv_obj_t *on_btn, lv_obj_t *off_btn)
+{
+    lv_obj_add_state(on_btn, LV_STATE_CHECKED);
+    lv_obj_remove_state(off_btn, LV_STATE_CHECKED);
+}
+
 static void draw_values(void)
 {
-    if (s_settings.voice == SETTINGS_VOICE_REED) {
-        lv_obj_remove_state(s_btn_samantha, LV_STATE_CHECKED);
-        lv_obj_add_state(s_btn_reed, LV_STATE_CHECKED);
+    if (s_settings.mode == SETTINGS_MODE_SPLIT) {
+        set_lit(s_btn_split_mode, s_btn_cycle_mode);
+        /* The split screen does not switch, so the cycle time does not apply. */
+        lv_obj_add_flag(s_cycle_group, LV_OBJ_FLAG_HIDDEN);
     } else {
-        lv_obj_add_state(s_btn_samantha, LV_STATE_CHECKED);
-        lv_obj_remove_state(s_btn_reed, LV_STATE_CHECKED);
+        set_lit(s_btn_cycle_mode, s_btn_split_mode);
+        lv_obj_remove_flag(s_cycle_group, LV_OBJ_FLAG_HIDDEN);
+    }
+
+    if (s_settings.voice == SETTINGS_VOICE_REED) {
+        set_lit(s_btn_reed, s_btn_samantha);
+    } else {
+        set_lit(s_btn_samantha, s_btn_reed);
     }
 
     lv_label_set_text_fmt(s_cycle_value, "%u s", (unsigned)s_settings.cycle_s);
@@ -83,6 +100,12 @@ static void gesture_event_cb(lv_event_t *e)
     /* The release must not also count as a tap on a button. */
     lv_indev_wait_release(indev);
     ui_settings_close();
+}
+
+static void mode_event_cb(lv_event_t *e)
+{
+    s_settings.mode = (settings_mode_t)(intptr_t)lv_event_get_user_data(e);
+    draw_values();
 }
 
 static void voice_event_cb(lv_event_t *e)
@@ -166,6 +189,14 @@ static lv_obj_t *make_step_row(lv_obj_t *parent, lv_event_cb_t cb, lv_obj_t **do
     return value;
 }
 
+/* Make a row for two buttons of the same width, one at each side. */
+static lv_obj_t *make_choice_row(lv_obj_t *parent)
+{
+    lv_obj_t *row = make_box(parent, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    return row;
+}
+
 static lv_obj_t *make_group(lv_obj_t *parent, const char *name)
 {
     lv_obj_t *group = make_box(parent, LV_FLEX_FLOW_COLUMN);
@@ -189,18 +220,24 @@ static void build_screen(void)
     lv_obj_add_event_cb(s_screen, gesture_event_cb, LV_EVENT_GESTURE, NULL);
 
     int32_t content_w = lv_display_get_horizontal_resolution(NULL) - 2 * UI_MARGIN;
-    int32_t voice_w = (content_w - UI_NAME_GAP) / 2;
+    int32_t choice_w = (content_w - UI_NAME_GAP) / 2;
+
+    lv_obj_t *mode = make_group(s_screen, "Mode");
+    lv_obj_t *mode_row = make_choice_row(mode);
+    s_btn_cycle_mode = make_button(mode_row, "Cycle", &font_settings_28, choice_w, mode_event_cb,
+                                   SETTINGS_MODE_CYCLE);
+    s_btn_split_mode = make_button(mode_row, "Split", &font_settings_28, choice_w, mode_event_cb,
+                                   SETTINGS_MODE_SPLIT);
 
     lv_obj_t *voice = make_group(s_screen, "Voice");
-    lv_obj_t *voice_row = make_box(voice, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(voice_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    s_btn_samantha = make_button(voice_row, "Samantha", &font_settings_28, voice_w, voice_event_cb,
+    lv_obj_t *voice_row = make_choice_row(voice);
+    s_btn_samantha = make_button(voice_row, "Samantha", &font_settings_28, choice_w, voice_event_cb,
                                  SETTINGS_VOICE_SAMANTHA);
-    s_btn_reed = make_button(voice_row, "Reed", &font_settings_28, voice_w, voice_event_cb,
+    s_btn_reed = make_button(voice_row, "Reed", &font_settings_28, choice_w, voice_event_cb,
                              SETTINGS_VOICE_REED);
 
-    lv_obj_t *cycle = make_group(s_screen, "Cycle time");
-    s_cycle_value = make_step_row(cycle, cycle_event_cb, &s_btn_cycle_down, &s_btn_cycle_up);
+    s_cycle_group = make_group(s_screen, "Cycle time");
+    s_cycle_value = make_step_row(s_cycle_group, cycle_event_cb, &s_btn_cycle_down, &s_btn_cycle_up);
 
     lv_obj_t *volume = make_group(s_screen, "Volume");
     s_volume_value = make_step_row(volume, volume_event_cb, &s_btn_volume_down, &s_btn_volume_up);

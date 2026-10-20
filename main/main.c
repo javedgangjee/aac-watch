@@ -12,9 +12,17 @@
 /* Time without a touch before the settings screen goes back by itself. */
 #define SETTINGS_IDLE_MS 30000
 
+/* What the panel shows. */
+typedef enum {
+    VIEW_NONE,
+    VIEW_YES,
+    VIEW_NO,
+    VIEW_SPLIT,
+} view_t;
+
 static screen_cycle_t s_cycle;
 static uint32_t s_last_tick;
-static screen_t s_shown;
+static view_t s_view;
 static bool s_lit;
 /* The settings in use. */
 static settings_t s_settings;
@@ -34,9 +42,17 @@ static void apply_state(void)
     }
 
     screen_t screen = screen_cycle_current(&s_cycle);
-    if (screen != s_shown) {
-        ui_show(screen);
-        s_shown = screen;
+    view_t view = VIEW_SPLIT;
+    if (!screen_cycle_is_split(&s_cycle)) {
+        view = (screen == SCREEN_YES) ? VIEW_YES : VIEW_NO;
+    }
+    if (view != s_view) {
+        if (view == VIEW_SPLIT) {
+            ui_show_split();
+        } else {
+            ui_show(screen);
+        }
+        s_view = view;
     }
     if (!s_lit) {
         /* Draw the new screen before the panel lights up, so the old screen does not flash. */
@@ -46,8 +62,15 @@ static void apply_state(void)
     }
 }
 
-/* Go back to the yes screen with a full cycle time and a new 2 minute count. Runs with the
- * display lock held. */
+/* Start the screen at yes with the saved cycle time and mode. */
+static void start_screen(void)
+{
+    screen_cycle_init(&s_cycle, SCREEN_YES, settings_cycle_ms(&s_settings));
+    screen_cycle_set_split(&s_cycle, s_settings.mode == SETTINGS_MODE_SPLIT);
+}
+
+/* Go back to the yes screen or the split screen with a full cycle time and a new 2 minute count.
+ * Runs with the display lock held. */
 static void on_settings_close(const settings_t *s)
 {
     s_in_settings = false;
@@ -62,7 +85,7 @@ static void on_settings_close(const settings_t *s)
         s_saved = s_settings;
     }
 
-    screen_cycle_init(&s_cycle, SCREEN_YES, settings_cycle_ms(&s_settings));
+    start_screen();
     ui_load();
     s_last_tick = lv_tick_get();
     apply_state();
@@ -89,8 +112,17 @@ static void on_tick(lv_timer_t *timer)
 
 static void on_tap(void)
 {
+    screen_t word = screen_cycle_current(&s_cycle);
+
+    /* On the lit split screen, the point where the press started picks the word. A press on the
+     * band between the halves does nothing. */
+    if (screen_cycle_is_split(&s_cycle) && screen_cycle_is_on(&s_cycle) &&
+        !screen_cycle_split_word(ui_press_start_y(), lv_display_get_vertical_resolution(NULL), &word)) {
+        return;
+    }
+
     if (screen_cycle_tap(&s_cycle) == SCREEN_TAP_SPEAK) {
-        audio_play(screen_cycle_current(&s_cycle), s_settings.voice);
+        audio_play(word, s_settings.voice);
         return;
     }
 
@@ -132,10 +164,9 @@ void app_main(void)
     bsp_display_brightness_set(0);
     s_lit = false;
 
-    screen_cycle_init(&s_cycle, SCREEN_YES, settings_cycle_ms(&s_settings));
+    start_screen();
     ui_init(on_tap, on_swipe_down);
-    s_shown = screen_cycle_current(&s_cycle);
-    ui_show(s_shown);
+    s_view = VIEW_NONE;
     apply_state();
 
     s_last_tick = lv_tick_get();

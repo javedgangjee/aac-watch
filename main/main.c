@@ -86,6 +86,7 @@ static void on_settings_close(const settings_t *s)
     }
 
     start_screen();
+    ui_set_icons(s_settings.icons == SETTINGS_ICONS_SHOW);
     ui_load();
     s_last_tick = lv_tick_get();
     apply_state();
@@ -166,6 +167,7 @@ void app_main(void)
 
     start_screen();
     ui_init(on_tap, on_swipe_down);
+    ui_set_icons(s_settings.icons == SETTINGS_ICONS_SHOW);
     s_view = VIEW_NONE;
     apply_state();
 

@@ -62,18 +62,21 @@ In split mode, the watch works as described below.
 - A tap on a half speaks the word on that half. A tap on the band does nothing.
 - The screen turns off after 2 minutes with no tap. A tap on the dark screen turns it on at the split screen and does not speak.
 
+The yes screen shows a check mark, and the no screen shows an X. In cycle mode, the icon sits above the word. In split mode, the icon sits to the left of the word on the same line. A tap on an icon speaks its word, as a tap on the screen does.
+
 In both modes, a swipe down from the top edge of the screen opens the settings screen.
 
-The settings screen has four settings.
+The settings screen has five settings. They do not all fit on the screen, so you drag the list up and down to see them.
 
 - The mode is Cycle or Split. The default is Cycle.
+- The icons setting is Show or Hide. The default is Show. When the icons are hidden, each word sits in the center of its screen or its half.
 - The voice is Samantha or Reed.
 - The cycle time goes from 3 to 15 seconds in steps of 1 second. The default is 5 seconds. The settings screen hides the cycle time while the Split button is lit.
 - The volume goes from 10 to 100 in steps of 10. The default is 90.
 
 The watch saves the settings and keeps them after a restart. Each of these actions takes you back to the yes and no screens.
 
-- A swipe up from the bottom edge of the screen goes back.
+- A swipe up from the bottom edge of the screen goes back. This works at any scroll position.
 - A tap on Done goes back.
 - The watch goes back by itself after 30 seconds with no touch.
 
@@ -90,3 +93,5 @@ You should have received a copy of the GNU General Public License along with thi
 The full license text is in [LICENSE](LICENSE).
 
 The Yes and No words use the Montserrat Bold font, which is under the [SIL Open Font License](https://github.com/JulietaUla/Montserrat/blob/master/OFL.txt). The settings screen uses the Atkinson Hyperlegible font. The font files and their license are in `tools/fonts/`.
+
+The check mark and X icons come from [Font Awesome Free](https://fontawesome.com) by Fonticons, Inc. The icon font is under the [SIL Open Font License 1.1](https://scripts.sil.org/OFL). The font file and its license are in `tools/fonts/`.

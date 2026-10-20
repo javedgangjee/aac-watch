@@ -158,6 +158,41 @@ static void test_case_s16_not_equal_mode(void)
     TEST_ASSERT_FALSE(settings_equal(&a, &b));
 }
 
+static void test_case_s17_default_icons(void)
+{
+    settings_t s;
+    settings_defaults(&s);
+    TEST_ASSERT_EQUAL(SETTINGS_ICONS_SHOW, s.icons);
+}
+
+static void test_case_s18_sanitize_icons_out_of_range(void)
+{
+    settings_t s;
+    settings_defaults(&s);
+    s.icons = (settings_icons_t)2;
+    TEST_ASSERT_TRUE(settings_sanitize(&s));
+    TEST_ASSERT_EQUAL(SETTINGS_ICONS_SHOW, s.icons);
+}
+
+static void test_case_s19_sanitize_keeps_hide(void)
+{
+    settings_t s;
+    settings_defaults(&s);
+    s.icons = SETTINGS_ICONS_HIDE;
+    TEST_ASSERT_FALSE(settings_sanitize(&s));
+    TEST_ASSERT_EQUAL(SETTINGS_ICONS_HIDE, s.icons);
+}
+
+static void test_case_s20_not_equal_icons(void)
+{
+    settings_t a;
+    settings_t b;
+    settings_defaults(&a);
+    b = a;
+    b.icons = SETTINGS_ICONS_HIDE;
+    TEST_ASSERT_FALSE(settings_equal(&a, &b));
+}
+
 void run_settings_tests(void)
 {
     RUN_TEST(test_case_s01_defaults);
@@ -176,4 +211,8 @@ void run_settings_tests(void)
     RUN_TEST(test_case_s14_sanitize_mode_out_of_range);
     RUN_TEST(test_case_s15_sanitize_keeps_split);
     RUN_TEST(test_case_s16_not_equal_mode);
+    RUN_TEST(test_case_s17_default_icons);
+    RUN_TEST(test_case_s18_sanitize_icons_out_of_range);
+    RUN_TEST(test_case_s19_sanitize_keeps_hide);
+    RUN_TEST(test_case_s20_not_equal_icons);
 }

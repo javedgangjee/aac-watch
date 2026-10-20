@@ -32,14 +32,22 @@ typedef enum {
 
 #define SETTINGS_MODE_DEFAULT SETTINGS_MODE_CYCLE
 
+typedef enum {
+    SETTINGS_ICONS_HIDE,
+    SETTINGS_ICONS_SHOW,
+} settings_icons_t;
+
+#define SETTINGS_ICONS_DEFAULT SETTINGS_ICONS_SHOW
+
 typedef struct {
     settings_mode_t mode;
+    settings_icons_t icons;
     settings_voice_t voice;
     uint8_t cycle_s;
     uint8_t volume;
 } settings_t;
 
-/* Set the mode, the voice, the cycle time, and the volume to their defaults. */
+/* Set the mode, the icons, the voice, the cycle time, and the volume to their defaults. */
 void settings_defaults(settings_t *s);
 
 /* Move the cycle time one step up for dir +1 or down for dir -1, and stay inside the limits.

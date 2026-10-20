@@ -2,12 +2,22 @@
 #include "ui.h"
 
 LV_FONT_DECLARE(font_yes_no_160);
+LV_FONT_DECLARE(font_icons_150);
+LV_FONT_DECLARE(font_icons_80);
 
 #define UI_COLOR_YES 0x007A29
 #define UI_COLOR_NO  0xC62828
 
+/* The gap between the icon and the word in cycle mode and in split mode. */
+#define UI_ICON_GAP_CYCLE 32
+#define UI_ICON_GAP_SPLIT 16
+
 static lv_obj_t *s_screen;
+static lv_obj_t *s_box;
 static lv_obj_t *s_label;
+static lv_obj_t *s_icon;
+static lv_obj_t *s_icon_yes;
+static lv_obj_t *s_icon_no;
 static lv_obj_t *s_half_yes;
 static lv_obj_t *s_half_no;
 static ui_tap_cb_t s_on_tap;
@@ -53,9 +63,37 @@ static void ui_gesture_event_cb(lv_event_t *e)
     }
 }
 
-/* Make one hidden half of the split screen at row y with a word in its center. The half does not
- * take presses, so they reach the screen. */
-static lv_obj_t *make_half(int32_t y, int32_t height, uint32_t color, const char *word)
+/* Make a box with no look of its own in the center of parent. The box does not take presses, so
+ * they reach the screen. */
+static lv_obj_t *make_box(lv_obj_t *parent, lv_flex_flow_t flow, int32_t gap)
+{
+    lv_obj_t *box = lv_obj_create(parent);
+    lv_obj_remove_style_all(box);
+    lv_obj_remove_flag(box, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_size(box, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(box, flow);
+    lv_obj_set_flex_align(box, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_pad_row(box, gap, 0);
+    lv_obj_set_style_pad_column(box, gap, 0);
+    lv_obj_center(box);
+    return box;
+}
+
+/* Make a white label in font. The label does not take presses. */
+static lv_obj_t *make_label(lv_obj_t *parent, const lv_font_t *font)
+{
+    lv_obj_t *label = lv_label_create(parent);
+    lv_obj_remove_flag(label, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_style_text_font(label, font, 0);
+    lv_obj_set_style_text_color(label, lv_color_white(), 0);
+    return label;
+}
+
+/* Make one hidden half of the split screen at row y with the icon and the word on one line in its
+ * center. Return the half and put its icon label in icon. The half does not take presses, so they
+ * reach the screen. */
+static lv_obj_t *make_half(int32_t y, int32_t height, uint32_t color, const char *symbol,
+                           const char *word, lv_obj_t **icon)
 {
     lv_obj_t *half = lv_obj_create(s_screen);
     lv_obj_remove_style_all(half);
@@ -66,11 +104,13 @@ static lv_obj_t *make_half(int32_t y, int32_t height, uint32_t color, const char
     lv_obj_set_style_bg_opa(half, LV_OPA_COVER, 0);
     lv_obj_set_style_bg_color(half, lv_color_hex(color), 0);
 
-    lv_obj_t *label = lv_label_create(half);
-    lv_obj_set_style_text_font(label, &font_yes_no_160, 0);
-    lv_obj_set_style_text_color(label, lv_color_white(), 0);
+    /* The capitals fill the top 112 of the 113 rows of the word label, so the row centers the
+     * icon on the capitals. */
+    lv_obj_t *box = make_box(half, LV_FLEX_FLOW_ROW, UI_ICON_GAP_SPLIT);
+    *icon = make_label(box, &font_icons_80);
+    lv_label_set_text_static(*icon, symbol);
+    lv_obj_t *label = make_label(box, &font_yes_no_160);
     lv_label_set_text_static(label, word);
-    lv_obj_center(label);
     return half;
 }
 
@@ -86,27 +126,47 @@ void ui_init(ui_tap_cb_t on_tap, ui_swipe_cb_t on_swipe_down)
     ui_track_press(s_screen);
     lv_obj_add_event_cb(s_screen, ui_gesture_event_cb, LV_EVENT_GESTURE, NULL);
 
-    s_label = lv_label_create(s_screen);
-    lv_obj_set_style_text_font(s_label, &font_yes_no_160, 0);
-    lv_obj_set_style_text_color(s_label, lv_color_white(), 0);
-    lv_obj_center(s_label);
+    /* In cycle mode, the icon sits above the word and the two sit in the center as one group. */
+    s_box = make_box(s_screen, LV_FLEX_FLOW_COLUMN, UI_ICON_GAP_CYCLE);
+    s_icon = make_label(s_box, &font_icons_150);
+    s_label = make_label(s_box, &font_yes_no_160);
 
     int32_t half_h = (lv_display_get_vertical_resolution(NULL) - SCREEN_CYCLE_SPLIT_GAP) / 2;
-    s_half_yes = make_half(0, half_h, UI_COLOR_YES, "Yes");
-    s_half_no = make_half(half_h + SCREEN_CYCLE_SPLIT_GAP, half_h, UI_COLOR_NO, "No");
+    s_half_yes = make_half(0, half_h, UI_COLOR_YES, LV_SYMBOL_OK, "Yes", &s_icon_yes);
+    s_half_no = make_half(half_h + SCREEN_CYCLE_SPLIT_GAP, half_h, UI_COLOR_NO, LV_SYMBOL_CLOSE, "No",
+                          &s_icon_no);
+}
+
+/* Show obj if show is true, and hide it if not. A hidden label takes no space in its box. */
+static void set_shown(lv_obj_t *obj, bool show)
+{
+    if (show) {
+        lv_obj_remove_flag(obj, LV_OBJ_FLAG_HIDDEN);
+    } else {
+        lv_obj_add_flag(obj, LV_OBJ_FLAG_HIDDEN);
+    }
+}
+
+void ui_set_icons(bool show)
+{
+    set_shown(s_icon, show);
+    set_shown(s_icon_yes, show);
+    set_shown(s_icon_no, show);
 }
 
 void ui_show(screen_t screen)
 {
     lv_obj_add_flag(s_half_yes, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(s_half_no, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_remove_flag(s_label, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_remove_flag(s_box, LV_OBJ_FLAG_HIDDEN);
 
     if (screen == SCREEN_YES) {
         lv_obj_set_style_bg_color(s_screen, lv_color_hex(UI_COLOR_YES), 0);
+        lv_label_set_text_static(s_icon, LV_SYMBOL_OK);
         lv_label_set_text_static(s_label, "Yes");
     } else {
         lv_obj_set_style_bg_color(s_screen, lv_color_hex(UI_COLOR_NO), 0);
+        lv_label_set_text_static(s_icon, LV_SYMBOL_CLOSE);
         lv_label_set_text_static(s_label, "No");
     }
 }
@@ -115,7 +175,7 @@ void ui_show_split(void)
 {
     /* The black screen behind the halves draws the band between them. */
     lv_obj_set_style_bg_color(s_screen, lv_color_black(), 0);
-    lv_obj_add_flag(s_label, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(s_box, LV_OBJ_FLAG_HIDDEN);
     lv_obj_remove_flag(s_half_yes, LV_OBJ_FLAG_HIDDEN);
     lv_obj_remove_flag(s_half_no, LV_OBJ_FLAG_HIDDEN);
 }

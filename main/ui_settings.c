@@ -11,6 +11,12 @@ LV_FONT_DECLARE(font_settings_48);
 #define UI_BUTTON_H          48
 #define UI_STEP_BUTTON_W     88
 #define UI_RADIUS            16
+/* Each row is the name, the name gap, and the button row. */
+#define UI_ROW_H             81
+/* The line between two rows has this much space above and below it. */
+#define UI_LINE_SPACE        10
+#define UI_LINE_W            1
+#define UI_DONE_GAP          20
 
 #define UI_COLOR_BUTTON      0x333333
 #define UI_COLOR_PRESSED     0x555555
@@ -25,6 +31,8 @@ LV_FONT_DECLARE(font_settings_48);
 static lv_obj_t *s_screen;
 static lv_obj_t *s_btn_cycle_mode;
 static lv_obj_t *s_btn_split_mode;
+static lv_obj_t *s_btn_icons_show;
+static lv_obj_t *s_btn_icons_hide;
 static lv_obj_t *s_btn_samantha;
 static lv_obj_t *s_btn_reed;
 static lv_obj_t *s_cycle_group;
@@ -71,6 +79,15 @@ static void draw_values(void)
         set_lit(s_btn_cycle_mode, s_btn_split_mode);
         lv_obj_remove_flag(s_cycle_group, LV_OBJ_FLAG_HIDDEN);
     }
+    /* The list is shorter without the cycle time row, so keep the scroll inside its new end. */
+    lv_obj_update_layout(s_screen);
+    lv_obj_readjust_scroll(s_screen, LV_ANIM_OFF);
+
+    if (s_settings.icons == SETTINGS_ICONS_HIDE) {
+        set_lit(s_btn_icons_hide, s_btn_icons_show);
+    } else {
+        set_lit(s_btn_icons_show, s_btn_icons_hide);
+    }
 
     if (s_settings.voice == SETTINGS_VOICE_REED) {
         set_lit(s_btn_reed, s_btn_samantha);
@@ -105,6 +122,36 @@ static void gesture_event_cb(lv_event_t *e)
 static void mode_event_cb(lv_event_t *e)
 {
     s_settings.mode = (settings_mode_t)(intptr_t)lv_event_get_user_data(e);
+    draw_values();
+}
+
+/* A press that starts near the bottom edge stops the list from scrolling, so the swipe up from the
+ * bottom edge is seen at any scroll position. The release turns the scroll on again. */
+static void edge_event_cb(lv_event_t *e)
+{
+    if (lv_event_get_code(e) != LV_EVENT_PRESSED) {
+        lv_obj_add_flag(s_screen, LV_OBJ_FLAG_SCROLLABLE);
+        return;
+    }
+    lv_point_t p;
+    lv_indev_get_point(lv_indev_active(), &p);
+    if (p.y >= lv_obj_get_height(s_screen) - UI_SWIPE_EDGE) {
+        lv_obj_remove_flag(s_screen, LV_OBJ_FLAG_SCROLLABLE);
+    }
+}
+
+/* Watch the presses on obj for the bottom edge rule. After a swipe closes the screen, the pressed
+ * object gets PRESS_LOST in place of RELEASED, so both turn the scroll on again. */
+static void track_edge(lv_obj_t *obj)
+{
+    lv_obj_add_event_cb(obj, edge_event_cb, LV_EVENT_PRESSED, NULL);
+    lv_obj_add_event_cb(obj, edge_event_cb, LV_EVENT_RELEASED, NULL);
+    lv_obj_add_event_cb(obj, edge_event_cb, LV_EVENT_PRESS_LOST, NULL);
+}
+
+static void icons_event_cb(lv_event_t *e)
+{
+    s_settings.icons = (settings_icons_t)(intptr_t)lv_event_get_user_data(e);
     draw_values();
 }
 
@@ -161,6 +208,7 @@ static lv_obj_t *make_button(lv_obj_t *parent, const char *text, const lv_font_t
     lv_obj_set_style_bg_color(btn, lv_color_hex(UI_COLOR_DIM_BUTTON), UI_STATE_DIM);
     lv_obj_set_style_text_color(btn, lv_color_hex(UI_COLOR_DIM_TEXT), UI_STATE_DIM);
     ui_track_press(btn);
+    track_edge(btn);
     lv_obj_add_event_cb(btn, cb, LV_EVENT_CLICKED, (void *)arg);
 
     lv_obj_t *label = lv_label_create(btn);
@@ -197,10 +245,24 @@ static lv_obj_t *make_choice_row(lv_obj_t *parent)
     return row;
 }
 
-static lv_obj_t *make_group(lv_obj_t *parent, const char *name)
+/* Make a group of a fixed height with its name at the top. With line set, the group starts with a
+ * line that has space above and below it. The line is the top border of the group, so it hides
+ * with the group. */
+static lv_obj_t *make_group(lv_obj_t *parent, const char *name, bool line)
 {
     lv_obj_t *group = make_box(parent, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_style_pad_row(group, UI_NAME_GAP, 0);
+    int32_t height = UI_ROW_H;
+    if (line) {
+        lv_obj_set_style_margin_top(group, UI_LINE_SPACE, 0);
+        lv_obj_set_style_border_side(group, LV_BORDER_SIDE_TOP, 0);
+        lv_obj_set_style_border_width(group, UI_LINE_W, 0);
+        lv_obj_set_style_border_color(group, lv_color_hex(UI_COLOR_BUTTON), 0);
+        lv_obj_set_style_border_opa(group, LV_OPA_COVER, 0);
+        lv_obj_set_style_pad_top(group, UI_LINE_SPACE, 0);
+        height += UI_LINE_W + UI_LINE_SPACE;
+    }
+    lv_obj_set_height(group, height);
     make_name(group, name);
     return group;
 }
@@ -208,41 +270,53 @@ static lv_obj_t *make_group(lv_obj_t *parent, const char *name)
 static void build_screen(void)
 {
     s_screen = lv_obj_create(NULL);
-    lv_obj_remove_flag(s_screen, LV_OBJ_FLAG_SCROLLABLE);
+    /* The list scrolls up and down and stops at its ends with no bounce. */
+    lv_obj_set_scroll_dir(s_screen, LV_DIR_VER);
+    lv_obj_remove_flag(s_screen, LV_OBJ_FLAG_SCROLL_ELASTIC);
     lv_obj_set_style_bg_opa(s_screen, LV_OPA_COVER, 0);
     lv_obj_set_style_bg_color(s_screen, lv_color_black(), 0);
     lv_obj_set_style_text_color(s_screen, lv_color_white(), 0);
     lv_obj_set_style_text_font(s_screen, &font_settings_28, 0);
     lv_obj_set_style_pad_all(s_screen, UI_MARGIN, 0);
     lv_obj_set_flex_flow(s_screen, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_flex_align(s_screen, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+    lv_obj_set_flex_align(s_screen, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+    lv_obj_set_style_pad_row(s_screen, 0, 0);
     ui_track_press(s_screen);
+    track_edge(s_screen);
     lv_obj_add_event_cb(s_screen, gesture_event_cb, LV_EVENT_GESTURE, NULL);
 
     int32_t content_w = lv_display_get_horizontal_resolution(NULL) - 2 * UI_MARGIN;
     int32_t choice_w = (content_w - UI_NAME_GAP) / 2;
 
-    lv_obj_t *mode = make_group(s_screen, "Mode");
+    lv_obj_t *mode = make_group(s_screen, "Mode", false);
     lv_obj_t *mode_row = make_choice_row(mode);
     s_btn_cycle_mode = make_button(mode_row, "Cycle", &font_settings_28, choice_w, mode_event_cb,
                                    SETTINGS_MODE_CYCLE);
     s_btn_split_mode = make_button(mode_row, "Split", &font_settings_28, choice_w, mode_event_cb,
                                    SETTINGS_MODE_SPLIT);
 
-    lv_obj_t *voice = make_group(s_screen, "Voice");
+    lv_obj_t *icons = make_group(s_screen, "Icons", true);
+    lv_obj_t *icons_row = make_choice_row(icons);
+    s_btn_icons_show = make_button(icons_row, "Show", &font_settings_28, choice_w, icons_event_cb,
+                                   SETTINGS_ICONS_SHOW);
+    s_btn_icons_hide = make_button(icons_row, "Hide", &font_settings_28, choice_w, icons_event_cb,
+                                   SETTINGS_ICONS_HIDE);
+
+    lv_obj_t *voice = make_group(s_screen, "Voice", true);
     lv_obj_t *voice_row = make_choice_row(voice);
     s_btn_samantha = make_button(voice_row, "Samantha", &font_settings_28, choice_w, voice_event_cb,
                                  SETTINGS_VOICE_SAMANTHA);
     s_btn_reed = make_button(voice_row, "Reed", &font_settings_28, choice_w, voice_event_cb,
                              SETTINGS_VOICE_REED);
 
-    s_cycle_group = make_group(s_screen, "Cycle time");
+    s_cycle_group = make_group(s_screen, "Cycle time", true);
     s_cycle_value = make_step_row(s_cycle_group, cycle_event_cb, &s_btn_cycle_down, &s_btn_cycle_up);
 
-    lv_obj_t *volume = make_group(s_screen, "Volume");
+    lv_obj_t *volume = make_group(s_screen, "Volume", true);
     s_volume_value = make_step_row(volume, volume_event_cb, &s_btn_volume_down, &s_btn_volume_up);
 
-    make_button(s_screen, "Done", &font_settings_28, content_w, done_event_cb, 0);
+    lv_obj_t *done = make_button(s_screen, "Done", &font_settings_28, content_w, done_event_cb, 0);
+    lv_obj_set_style_margin_top(done, UI_DONE_GAP, 0);
 }
 
 void ui_settings_open(const settings_t *current, ui_settings_close_cb_t on_close)
@@ -253,5 +327,6 @@ void ui_settings_open(const settings_t *current, ui_settings_close_cb_t on_close
     s_settings = *current;
     s_on_close = on_close;
     draw_values();
+    lv_obj_scroll_to_y(s_screen, 0, LV_ANIM_OFF);
     lv_screen_load(s_screen);
 }

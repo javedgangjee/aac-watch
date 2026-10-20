@@ -16,7 +16,10 @@ static screen_cycle_t s_cycle;
 static uint32_t s_last_tick;
 static screen_t s_shown;
 static bool s_lit;
+/* The settings in use. */
 static settings_t s_settings;
+/* The settings as the last good save left them in flash. */
+static settings_t s_saved;
 static bool s_in_settings;
 
 /* Bring the panel in line with the cycle state. Runs with the display lock held. */
@@ -49,17 +52,17 @@ static void on_settings_close(const settings_t *s)
 {
     s_in_settings = false;
 
-    if (s->voice != s_settings.voice || s->cycle_s != s_settings.cycle_s ||
-        s->volume != s_settings.volume) {
-        settings_store_save(s);
-        if (s->volume != s_settings.volume) {
-            audio_set_volume(s->volume);
-        }
-        s_settings = *s;
+    if (s->volume != s_settings.volume) {
+        audio_set_volume(s->volume);
+    }
+    s_settings = *s;
+
+    /* A failed save is tried again at the next close. */
+    if (!settings_equal(&s_settings, &s_saved) && settings_store_save(&s_settings) == ESP_OK) {
+        s_saved = s_settings;
     }
 
-    screen_cycle_init(&s_cycle, SCREEN_YES);
-    screen_cycle_set_period(&s_cycle, settings_cycle_ms(&s_settings));
+    screen_cycle_init(&s_cycle, SCREEN_YES, settings_cycle_ms(&s_settings));
     ui_load();
     s_last_tick = lv_tick_get();
     apply_state();
@@ -118,6 +121,7 @@ static void on_speak_done(void)
 void app_main(void)
 {
     settings_store_load(&s_settings);
+    s_saved = s_settings;
 
     bsp_display_start();
     ESP_ERROR_CHECK(audio_init(s_settings.volume, on_speak_done));
@@ -128,8 +132,7 @@ void app_main(void)
     bsp_display_brightness_set(0);
     s_lit = false;
 
-    screen_cycle_init(&s_cycle, SCREEN_YES);
-    screen_cycle_set_period(&s_cycle, settings_cycle_ms(&s_settings));
+    screen_cycle_init(&s_cycle, SCREEN_YES, settings_cycle_ms(&s_settings));
     ui_init(on_tap, on_swipe_down);
     s_shown = screen_cycle_current(&s_cycle);
     ui_show(s_shown);

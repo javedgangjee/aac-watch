@@ -33,6 +33,8 @@ Each settings case starts from `settings_defaults`, unless the case says otherwi
 | S8 | The test sanitizes voice 7, cycle time 2, and volume 95. | The function returns true. The voice is `SETTINGS_VOICE_SAMANTHA`, the cycle time is 5, and the volume is 90. |
 | S9 | The test sanitizes `SETTINGS_VOICE_REED`, cycle time 16, and volume 0. | The function returns true. The voice is `SETTINGS_VOICE_REED`, the cycle time is 5, and the volume is 90. |
 | S10 | The test sanitizes `SETTINGS_VOICE_REED`, cycle time 15, and volume 10. | The function returns false and the settings do not change. |
+| S11 | The test compares the defaults with the defaults. | The function `settings_equal` returns true. |
+| S12 | The test compares the defaults with three copies. The first copy has `SETTINGS_VOICE_REED`, the second has cycle time 6, and the third has volume 80. | The function `settings_equal` returns false for each copy. |
 
 ### Check 2. The clip script makes all four clips.
 

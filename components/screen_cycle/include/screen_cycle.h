@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-/* Time between two screen switches until screen_cycle_set_period changes it. */
+/* Time between two screen switches when the caller gives a period of 0. */
 #define SCREEN_CYCLE_DEFAULT_PERIOD_MS 5000
 /* Time without a tap before the screen turns off. */
 #define SCREEN_CYCLE_OFF_MS 120000
@@ -33,9 +33,9 @@ typedef struct {
     uint32_t idle_ms;
 } screen_cycle_t;
 
-/* Set the first screen, turn the screen on, clear the speaking state, set the period to the
- * default, and set both counts to zero. */
-void screen_cycle_init(screen_cycle_t *sc, screen_t first);
+/* Set the first screen and the period, turn the screen on, clear the speaking state, and set
+ * both counts to zero. A period of 0 becomes SCREEN_CYCLE_DEFAULT_PERIOD_MS. */
+void screen_cycle_init(screen_cycle_t *sc, screen_t first, uint32_t period_ms);
 
 /* Add elapsed_ms to the off count, and to the switch count when the screen is not speaking.
  * Return true if the screen or the on state changed. */
@@ -48,7 +48,8 @@ screen_tap_t screen_cycle_tap(screen_cycle_t *sc);
 /* End the speaking state and set the switch count to zero. Do nothing when not speaking. */
 void screen_cycle_speak_done(screen_cycle_t *sc);
 
-/* Set the time between two screen switches and set the switch count to zero. */
+/* Set the time between two screen switches and set the switch count to zero. A period of 0
+ * becomes SCREEN_CYCLE_DEFAULT_PERIOD_MS. */
 void screen_cycle_set_period(screen_cycle_t *sc, uint32_t period_ms);
 
 screen_t screen_cycle_current(const screen_cycle_t *sc);

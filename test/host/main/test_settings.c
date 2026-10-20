@@ -95,6 +95,34 @@ static void test_case_s10_sanitize_limits(void)
     assert_settings(SETTINGS_VOICE_REED, 15, 10, &s);
 }
 
+static void test_case_s11_equal_defaults(void)
+{
+    settings_t a;
+    settings_t b;
+    settings_defaults(&a);
+    settings_defaults(&b);
+    TEST_ASSERT_TRUE(settings_equal(&a, &b));
+}
+
+static void test_case_s12_not_equal_one_field(void)
+{
+    settings_t a;
+    settings_t b;
+    settings_defaults(&a);
+
+    b = a;
+    b.voice = SETTINGS_VOICE_REED;
+    TEST_ASSERT_FALSE(settings_equal(&a, &b));
+
+    b = a;
+    b.cycle_s = 6;
+    TEST_ASSERT_FALSE(settings_equal(&a, &b));
+
+    b = a;
+    b.volume = 80;
+    TEST_ASSERT_FALSE(settings_equal(&a, &b));
+}
+
 void run_settings_tests(void)
 {
     RUN_TEST(test_case_s01_defaults);
@@ -107,4 +135,6 @@ void run_settings_tests(void)
     RUN_TEST(test_case_s08_sanitize_all_out_of_range);
     RUN_TEST(test_case_s09_sanitize_keeps_valid_voice);
     RUN_TEST(test_case_s10_sanitize_limits);
+    RUN_TEST(test_case_s11_equal_defaults);
+    RUN_TEST(test_case_s12_not_equal_one_field);
 }

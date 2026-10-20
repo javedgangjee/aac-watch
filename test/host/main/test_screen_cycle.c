@@ -8,7 +8,7 @@ static screen_cycle_t sc;
 
 void setUp(void)
 {
-    screen_cycle_init(&sc, SCREEN_YES);
+    screen_cycle_init(&sc, SCREEN_YES, SCREEN_CYCLE_DEFAULT_PERIOD_MS);
 }
 
 void tearDown(void)
@@ -35,7 +35,7 @@ static void test_case_01_starts_on_yes(void)
 
 static void test_case_02_starts_on_no(void)
 {
-    screen_cycle_init(&sc, SCREEN_NO);
+    screen_cycle_init(&sc, SCREEN_NO, SCREEN_CYCLE_DEFAULT_PERIOD_MS);
     TEST_ASSERT_EQUAL(SCREEN_NO, screen_cycle_current(&sc));
 }
 

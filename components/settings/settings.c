@@ -52,3 +52,8 @@ uint32_t settings_cycle_ms(const settings_t *s)
 {
     return (uint32_t)s->cycle_s * 1000;
 }
+
+bool settings_equal(const settings_t *a, const settings_t *b)
+{
+    return a->voice == b->voice && a->cycle_s == b->cycle_s && a->volume == b->volume;
+}

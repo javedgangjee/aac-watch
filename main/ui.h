@@ -1,7 +1,12 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stdint.h>
+#include "lvgl.h"
 #include "screen_cycle.h"
+
+/* A swipe that opens or closes the settings screen must start this close to the edge. */
+#define UI_SWIPE_EDGE 60
 
 typedef void (*ui_tap_cb_t)(void);
 
@@ -17,3 +22,9 @@ void ui_show(screen_t screen);
 
 /* Load the yes and no screen again after the settings screen. Call with the display lock held. */
 void ui_load(void);
+
+/* Record where each press on obj starts. Call with the display lock held. */
+void ui_track_press(lv_obj_t *obj);
+
+/* Return the y position where the last press on a tracked object started. */
+int32_t ui_press_start_y(void);

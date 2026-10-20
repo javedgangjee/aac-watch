@@ -1,4 +1,5 @@
 #include "lvgl.h"
+#include "ui.h"
 #include "ui_settings.h"
 
 LV_FONT_DECLARE(font_settings_28);
@@ -9,8 +10,6 @@ LV_FONT_DECLARE(font_settings_48);
 #define UI_BUTTON_H          64
 #define UI_STEP_BUTTON_W     96
 #define UI_RADIUS            16
-/* A swipe up must start this close to the bottom edge to close the screen. */
-#define UI_SWIPE_EDGE        60
 
 #define UI_COLOR_BUTTON      0x333333
 #define UI_COLOR_PRESSED     0x555555
@@ -33,7 +32,6 @@ static lv_obj_t *s_cycle_value;
 static lv_obj_t *s_volume_value;
 static settings_t s_settings;
 static ui_settings_close_cb_t s_on_close;
-static int32_t s_press_y;
 
 void ui_settings_close(void)
 {
@@ -71,14 +69,6 @@ static void draw_values(void)
     set_enabled(s_btn_volume_up, s_settings.volume < SETTINGS_VOLUME_MAX);
 }
 
-static void press_event_cb(lv_event_t *e)
-{
-    (void)e;
-    lv_point_t p;
-    lv_indev_get_point(lv_indev_active(), &p);
-    s_press_y = p.y;
-}
-
 static void gesture_event_cb(lv_event_t *e)
 {
     (void)e;
@@ -86,7 +76,7 @@ static void gesture_event_cb(lv_event_t *e)
     if (lv_indev_get_gesture_dir(indev) != LV_DIR_TOP) {
         return;
     }
-    if (s_press_y < lv_obj_get_height(s_screen) - UI_SWIPE_EDGE) {
+    if (ui_press_start_y() < lv_obj_get_height(s_screen) - UI_SWIPE_EDGE) {
         return;
     }
     /* The release must not also count as a tap on a button. */
@@ -146,7 +136,7 @@ static lv_obj_t *make_button(lv_obj_t *parent, const char *text, const lv_font_t
     lv_obj_set_style_text_color(btn, lv_color_black(), LV_STATE_CHECKED);
     lv_obj_set_style_bg_color(btn, lv_color_hex(UI_COLOR_DIM_BUTTON), UI_STATE_DIM);
     lv_obj_set_style_text_color(btn, lv_color_hex(UI_COLOR_DIM_TEXT), UI_STATE_DIM);
-    lv_obj_add_event_cb(btn, press_event_cb, LV_EVENT_PRESSED, NULL);
+    ui_track_press(btn);
     lv_obj_add_event_cb(btn, cb, LV_EVENT_CLICKED, (void *)arg);
 
     lv_obj_t *label = lv_label_create(btn);
@@ -194,7 +184,7 @@ static void build_screen(void)
     lv_obj_set_style_pad_all(s_screen, UI_MARGIN, 0);
     lv_obj_set_flex_flow(s_screen, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(s_screen, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-    lv_obj_add_event_cb(s_screen, press_event_cb, LV_EVENT_PRESSED, NULL);
+    ui_track_press(s_screen);
     lv_obj_add_event_cb(s_screen, gesture_event_cb, LV_EVENT_GESTURE, NULL);
 
     int32_t content_w = lv_display_get_horizontal_resolution(NULL) - 2 * UI_MARGIN;

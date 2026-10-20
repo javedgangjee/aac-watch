@@ -47,6 +47,9 @@ bool settings_sanitize(settings_t *s);
 
 uint32_t settings_cycle_ms(const settings_t *s);
 
+/* Return true if every field of a and b is the same. */
+bool settings_equal(const settings_t *a, const settings_t *b);
+
 #ifdef __cplusplus
 }
 #endif

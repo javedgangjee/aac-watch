@@ -123,3 +123,21 @@ The expected result is that the yes screen shows at full brightness, the setting
 2. Do feature 2 checks 4, 6, 7, and 8 again.
 
 The expected result is the same as in feature 2.
+
+## Results
+
+These results are from 2026-10-19.
+
+- Check 1 passes. Unity runs 39 tests with 0 failures, which includes cases 22 to 27 and S1 to S12.
+- Check 2 passes. The script makes the four clips, and the byte counts are 21194, 18240, 35922, and 34498.
+- Check 3 passes. The build ends with no errors, and the log shows the clip script wrote all four clips. The only warnings come from LVGL and ESP-IDF.
+- Check 4 fails on the first run and passes on the second run. On the first run, the round corners of the screen cut off the items at the corners. The fix sets the margin of the settings screen to 44 pixels and the button height to 56 pixels, and plan.md step 9 now gives the new margin.
+- Checks 5 to 13 pass.
+
+No check in this file covers these requirements, so they have no passing check.
+
+- Item 9 says the settings screen makes no sound when a setting changes. Checks 6, 7, and 8 change settings, but their expected results do not say that the watch stays silent.
+- Item 13 says the 2 minute count starts from zero after the settings screen closes. No check measures this.
+- Item 14 says the 2 minute count stops while the settings screen shows, and a word that plays when the screen opens plays to the end. No check covers either part.
+- Item 10 says a swipe up must start in the bottom 60 pixels. Check 5 tests a swipe down from the middle, but no check tests a swipe up from the middle.
+- Items 17, 18, and 19 cover the font source, the font settings, and the file names. No check covers them, but a review of the files on 2026-10-19 found the TTF files and OFL.txt in `tools/fonts/`, fonts that are not compressed with the range 0x20 to 0x7E, and the file names and NVS keys that item 19 lists.

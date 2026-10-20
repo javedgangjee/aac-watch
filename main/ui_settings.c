@@ -5,10 +5,11 @@
 LV_FONT_DECLARE(font_settings_28);
 LV_FONT_DECLARE(font_settings_48);
 
-#define UI_MARGIN            20
+/* The screen has round corners, so the margin keeps the corner items inside the glass. */
+#define UI_MARGIN            44
 #define UI_NAME_GAP          6
-#define UI_BUTTON_H          64
-#define UI_STEP_BUTTON_W     96
+#define UI_BUTTON_H          56
+#define UI_STEP_BUTTON_W     88
 #define UI_RADIUS            16
 
 #define UI_COLOR_BUTTON      0x333333

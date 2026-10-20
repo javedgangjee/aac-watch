@@ -50,7 +50,7 @@
 
 9. Build the settings screen.
    - This step creates `main/ui_settings.c` and `main/ui_settings.h`.
-   - The settings screen is its own LVGL screen object with a black background. It has the voice row, the cycle time row, the volume row, and the Done button, laid out as requirements.md item 8 says, with a 20 pixel margin from the edges.
+   - The settings screen is its own LVGL screen object with a black background. It has the voice row, the cycle time row, the volume row, and the Done button, laid out as requirements.md item 8 says, with a 44 pixel margin from the edges, so that nothing sits in the round corners of the screen.
    - The function `ui_settings_open` takes the current settings and a close callback, keeps a copy of the settings, draws the values, and loads the screen.
    - Each button changes the copy with the settings logic and redraws the values. A button at its limit shows dimmed.
    - The screen records where each press starts. A gesture to the top that starts in the bottom 60 pixels calls the close callback. The Done button also calls it. The callback gets the copy.

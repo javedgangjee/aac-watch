@@ -25,6 +25,8 @@ This file records the changes to aac-watch that a person who reads or runs the p
 - Feature 3 saves the settings in the NVS flash partition, so they stay after a restart, and a missing or out of range value falls back to its default.
 - Feature 3 adds the `settings` component, and the host tests now number 39.
 - Feature 3 adds the Atkinson Hyperlegible font for the settings screen, with the source TTF files and the SIL Open Font License in `tools/fonts/`.
+- Feature 4 adds a `LICENSE` file with the GNU General Public License version 3.0 text, and the project is under GPL 3.0 or any later version.
+- Feature 4 adds a README that says what the watch does and names the hardware. It also says what the build machine needs, how to build, flash, and use the watch, and gives the license.
 
 ### Changed
 
@@ -33,3 +35,9 @@ This file records the changes to aac-watch that a person who reads or runs the p
 - Feature 3 makes `tools/make_clips.py` write four clips, which are `yes_samantha.pcm`, `no_samantha.pcm`, `yes_reed.pcm`, and `no_reed.pcm`.
 - Feature 3 makes the cycle time a setting, and `screen_cycle_init` now takes the period, where a period of 0 means the default of 5 seconds.
 - Feature 3 makes `audio_init` take the start volume and makes `audio_play` take the voice.
+- Feature 4 renames the project from yes-no to aac-watch, so the firmware file is now `build/aac_watch.bin`.
+- Feature 4 changes the settings namespace in NVS from `yes_no` to `aac_watch`, so a watch that already has saved settings goes back to the defaults one time.
+
+### Removed
+
+- Feature 4 removes `.vscode/settings.json` from git and adds `.vscode/` and `.ruff_cache/` to `.gitignore`.

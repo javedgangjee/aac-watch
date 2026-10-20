@@ -16,6 +16,12 @@ The screen turns off after 2 minutes with no tap. A tap on the dark screen turns
 
 The watch also has a settings screen, which a person opens with a swipe down from the top edge of the screen. On it, the person sets the voice, the cycle time, and the speaker volume. The voice is Samantha, a female voice, or Reed, a male voice. A swipe up from the bottom edge or a Done button goes back to the yes and no screens.
 
+## Stretch goals
+
+The watch gets a second mode, which is the split mode. The mode described above is the cycle mode. In split mode, the top half of the screen shows yes on green and the bottom half shows no on red, and the screen does not switch. A tap on the yes half speaks yes, and a tap on the no half speaks no. A person picks the mode on the settings screen.
+
+The yes screen gets a check mark icon, and the no screen gets an X icon. A setting on the settings screen shows or hides the icons. In cycle mode, the icon sits above the word, as in a typical AAC app. In split mode, the icon sits on the same line as the word.
+
 ## Hardware
 
 The app runs on the Waveshare ESP32-S3-Touch-AMOLED-2.06. This board has a 410 by 502 AMOLED touch screen, an ES8311 audio codec, and a speaker.

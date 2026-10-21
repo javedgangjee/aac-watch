@@ -89,3 +89,25 @@ The expected result is that the screen turns white with a green "Yes" in the cen
 2. Do feature 6 checks 4, 8, and 11 again.
 
 The expected result is the same as in feature 6.
+
+## Results
+
+The checks ran on 2026-10-20.
+
+| Check | Result | Summary |
+|---|---|---|
+| 1 | Pass | Unity reported 69 tests and 0 failures. Cases 41 to 49 passed. |
+| 2 | Pass | The firmware built with no errors. The only warnings came from LVGL and FreeRTOS code. The watch was flashed with `idf.py flash`. |
+| 3 | Pass | The user reported a pass on the watch. |
+| 4 | Pass | The user reported a pass on the watch. |
+| 5 | Pass | The user reported a pass on the watch. |
+| 6 | Pass | The user reported a pass on the watch. |
+| 7 | Pass | The user reported a pass on the watch. |
+| 8 | Pass | The user reported a pass on the watch. |
+| 9 | Pass | The user reported a pass on the watch. |
+| 10 | Pass | The user reported a pass on the watch. |
+| 11 | Pass | The user reported a pass on the watch. |
+
+Each requirement from the specs has at least one passing check. Requirements 1 and 3 have checks 3, 4, 7, and 10. Requirement 2 has cases 44 and 48 and checks 3 and 9. Requirement 4 has case 47 and check 6. Requirement 5 has check 1. Requirement 6 has cases 1 to 40, S1 to S20, and check 11.
+
+Items 1 to 4 and item 6 of the items that the specs do not cover have passing checks. Item 5 and item 7 have no check. Item 5 says the settings screen gets no swap setting, and the settings screen in checks 9 to 11 shows no such setting. Item 7 is the README text, which is at line 67 of `README.md`.

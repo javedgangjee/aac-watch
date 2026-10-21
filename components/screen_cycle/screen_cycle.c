@@ -11,6 +11,7 @@ void screen_cycle_init(screen_cycle_t *sc, screen_t first, uint32_t period_ms)
     sc->screen = first;
     sc->on = true;
     sc->speaking = false;
+    sc->spoken = first;
     sc->split = false;
     sc->period_ms = valid_period(period_ms);
     sc->cycle_ms = 0;
@@ -48,7 +49,7 @@ bool screen_cycle_tick(screen_cycle_t *sc, uint32_t elapsed_ms)
     return false;
 }
 
-screen_tap_t screen_cycle_tap(screen_cycle_t *sc)
+screen_tap_t screen_cycle_tap_word(screen_cycle_t *sc, screen_t word)
 {
     if (!sc->on) {
         bool split = sc->split;
@@ -59,7 +60,13 @@ screen_tap_t screen_cycle_tap(screen_cycle_t *sc)
 
     sc->idle_ms = 0;
     sc->speaking = true;
+    sc->spoken = word;
     return SCREEN_TAP_SPEAK;
+}
+
+screen_tap_t screen_cycle_tap(screen_cycle_t *sc)
+{
+    return screen_cycle_tap_word(sc, sc->screen);
 }
 
 void screen_cycle_speak_done(screen_cycle_t *sc)
@@ -118,4 +125,13 @@ bool screen_cycle_is_on(const screen_cycle_t *sc)
 bool screen_cycle_is_speaking(const screen_cycle_t *sc)
 {
     return sc->speaking;
+}
+
+bool screen_cycle_spoken(const screen_cycle_t *sc, screen_t *word)
+{
+    if (!sc->speaking) {
+        return false;
+    }
+    *word = sc->spoken;
+    return true;
 }

@@ -24,6 +24,9 @@ static screen_cycle_t s_cycle;
 static uint32_t s_last_tick;
 static view_t s_view;
 static bool s_lit;
+/* The swap that the panel shows, and its word. */
+static bool s_swap_shown;
+static screen_t s_swap_word;
 /* The settings in use. */
 static settings_t s_settings;
 /* The settings as the last good save left them in flash. */
@@ -35,6 +38,11 @@ static void apply_state(void)
 {
     if (!screen_cycle_is_on(&s_cycle)) {
         if (s_lit) {
+            /* The screen wakes with its normal colors. */
+            if (s_swap_shown) {
+                ui_set_swap(false, s_swap_word);
+                s_swap_shown = false;
+            }
             bsp_display_brightness_set(0);
             s_lit = false;
         }
@@ -53,6 +61,16 @@ static void apply_state(void)
             ui_show(screen);
         }
         s_view = view;
+        /* A new view starts with its normal colors. */
+        s_swap_shown = false;
+    }
+
+    screen_t word = s_swap_word;
+    bool swap = screen_cycle_spoken(&s_cycle, &word);
+    if (swap != s_swap_shown || (swap && word != s_swap_word)) {
+        ui_set_swap(swap, word);
+        s_swap_shown = swap;
+        s_swap_word = word;
     }
     if (!s_lit) {
         /* Draw the new screen before the panel lights up, so the old screen does not flash. */
@@ -122,7 +140,9 @@ static void on_tap(void)
         return;
     }
 
-    if (screen_cycle_tap(&s_cycle) == SCREEN_TAP_SPEAK) {
+    if (screen_cycle_tap_word(&s_cycle, word) == SCREEN_TAP_SPEAK) {
+        /* The colors swap before the sound starts. */
+        apply_state();
         audio_play(word, s_settings.voice);
         return;
     }
@@ -148,6 +168,10 @@ static void on_speak_done(void)
 {
     bsp_display_lock(0);
     screen_cycle_speak_done(&s_cycle);
+    /* While the settings screen shows, the colors go back when it closes. */
+    if (!s_in_settings) {
+        apply_state();
+    }
     bsp_display_unlock();
 }
 

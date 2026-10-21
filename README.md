@@ -64,6 +64,8 @@ In split mode, the watch works as described below.
 
 The yes screen shows a check mark, and the no screen shows an X. In cycle mode, the icon sits above the word. In split mode, the icon sits to the left of the word on the same line. A tap on an icon speaks its word, as a tap on the screen does.
 
+While a word plays, the tapped screen or half shows white, and its icon and word show green for yes or red for no. The colors go back when the word ends.
+
 In both modes, a swipe down from the top edge of the screen opens the settings screen.
 
 The settings screen has five settings. They do not all fit on the screen, so you drag the list up and down to see them.

@@ -17,12 +17,17 @@ typedef bool (*ui_swipe_cb_t)(void);
  * a swipe down that starts near the top edge. Call with the display lock held. */
 void ui_init(ui_tap_cb_t on_tap, ui_swipe_cb_t on_swipe_down);
 
-/* Draw the given screen of the cycle mode. Call with the display lock held. */
+/* Draw the given screen of the cycle mode with its normal colors. Call with the display lock held. */
 void ui_show(screen_t screen);
 
-/* Draw the split screen, with yes on the top half and no on the bottom half. Call with the
- * display lock held. */
+/* Draw the split screen with its normal colors, with yes on the top half and no on the bottom
+ * half. Call with the display lock held. */
 void ui_show_split(void);
+
+/* If swap is true, make the background white and the icon and word green or red. In cycle mode
+ * this changes the shown screen. In split mode it changes the half of word and puts the other
+ * half back. If swap is false, put every color back. Call with the display lock held. */
+void ui_set_swap(bool swap, screen_t word);
 
 /* Show the icons on the yes and no screens if show is true, and hide them if not. A hidden icon
  * takes no space, so the word sits in the center. Call with the display lock held. */

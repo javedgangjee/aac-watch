@@ -30,6 +30,8 @@ typedef struct {
     screen_t screen;
     bool on;
     bool speaking;
+    /* The word that plays. It has meaning only while speaking is true. */
+    screen_t spoken;
     /* In split mode the screen shows both words and does not switch. */
     bool split;
     uint32_t period_ms;
@@ -45,8 +47,12 @@ void screen_cycle_init(screen_cycle_t *sc, screen_t first, uint32_t period_ms);
  * not in split mode. Return true if the screen or the on state changed. */
 bool screen_cycle_tick(screen_cycle_t *sc, uint32_t elapsed_ms);
 
-/* Handle a tap. On a dark screen, wake it at the yes screen and keep the period and the mode.
- * On a lit screen, restart the off count and start the speaking state. */
+/* Handle a tap on the given word. On a dark screen, wake it at the yes screen and keep the period
+ * and the mode. On a lit screen, restart the off count, start the speaking state, and record word
+ * as the spoken word. */
+screen_tap_t screen_cycle_tap_word(screen_cycle_t *sc, screen_t word);
+
+/* Handle a tap on the word of the current screen, as screen_cycle_tap_word does. */
 screen_tap_t screen_cycle_tap(screen_cycle_t *sc);
 
 /* End the speaking state and set the switch count to zero. Do nothing when not speaking. */
@@ -71,6 +77,10 @@ screen_t screen_cycle_current(const screen_cycle_t *sc);
 bool screen_cycle_is_on(const screen_cycle_t *sc);
 
 bool screen_cycle_is_speaking(const screen_cycle_t *sc);
+
+/* Return true while the screen is speaking and write the spoken word to word. Return false and
+ * leave word as it is when the screen is not speaking. */
+bool screen_cycle_spoken(const screen_cycle_t *sc, screen_t *word);
 
 #ifdef __cplusplus
 }

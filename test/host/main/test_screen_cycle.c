@@ -372,6 +372,85 @@ static void test_case_40_split_word_bottom_row(void)
     assert_split_word(501, true, SCREEN_NO);
 }
 
+/* Check that screen_cycle_spoken returns true and gives the expected word. */
+static void assert_spoken(screen_t expected)
+{
+    screen_t word = (expected == SCREEN_YES) ? SCREEN_NO : SCREEN_YES;
+    TEST_ASSERT_TRUE(screen_cycle_spoken(&sc, &word));
+    TEST_ASSERT_EQUAL(expected, word);
+}
+
+static void assert_not_spoken(void)
+{
+    screen_t word;
+    TEST_ASSERT_FALSE(screen_cycle_spoken(&sc, &word));
+}
+
+static void test_case_41_not_spoken_at_start(void)
+{
+    assert_not_spoken();
+}
+
+static void test_case_42_tap_speaks_yes(void)
+{
+    screen_cycle_tap(&sc);
+    assert_spoken(SCREEN_YES);
+}
+
+static void test_case_43_tap_speaks_no(void)
+{
+    screen_cycle_tick(&sc, 5000);
+    screen_cycle_tap(&sc);
+    TEST_ASSERT_EQUAL(SCREEN_NO, screen_cycle_current(&sc));
+    assert_spoken(SCREEN_NO);
+}
+
+static void test_case_44_word_end_clears_spoken(void)
+{
+    screen_cycle_tap(&sc);
+    screen_cycle_speak_done(&sc);
+    assert_not_spoken();
+}
+
+static void test_case_45_split_tap_no(void)
+{
+    screen_cycle_set_split(&sc, true);
+    TEST_ASSERT_EQUAL(SCREEN_TAP_SPEAK, screen_cycle_tap_word(&sc, SCREEN_NO));
+    assert_spoken(SCREEN_NO);
+}
+
+static void test_case_46_split_tap_other_half(void)
+{
+    screen_cycle_set_split(&sc, true);
+    screen_cycle_tap_word(&sc, SCREEN_YES);
+    assert_spoken(SCREEN_YES);
+    screen_cycle_tick(&sc, 200);
+    screen_cycle_tap_word(&sc, SCREEN_NO);
+    assert_spoken(SCREEN_NO);
+}
+
+static void test_case_47_wake_tap_not_spoken(void)
+{
+    tick_until_off();
+    TEST_ASSERT_EQUAL(SCREEN_TAP_WAKE, screen_cycle_tap_word(&sc, SCREEN_NO));
+    assert_not_spoken();
+}
+
+static void test_case_48_off_clears_spoken(void)
+{
+    screen_cycle_tap(&sc);
+    screen_cycle_tick(&sc, 120000);
+    TEST_ASSERT_FALSE(screen_cycle_is_on(&sc));
+    assert_not_spoken();
+}
+
+static void test_case_49_init_clears_spoken(void)
+{
+    screen_cycle_tap(&sc);
+    screen_cycle_init(&sc, SCREEN_YES, SCREEN_CYCLE_DEFAULT_PERIOD_MS);
+    assert_not_spoken();
+}
+
 void app_main(void)
 {
     UNITY_BEGIN();
@@ -415,6 +494,15 @@ void app_main(void)
     RUN_TEST(test_case_38_split_word_last_band_row);
     RUN_TEST(test_case_39_split_word_first_no_row);
     RUN_TEST(test_case_40_split_word_bottom_row);
+    RUN_TEST(test_case_41_not_spoken_at_start);
+    RUN_TEST(test_case_42_tap_speaks_yes);
+    RUN_TEST(test_case_43_tap_speaks_no);
+    RUN_TEST(test_case_44_word_end_clears_spoken);
+    RUN_TEST(test_case_45_split_tap_no);
+    RUN_TEST(test_case_46_split_tap_other_half);
+    RUN_TEST(test_case_47_wake_tap_not_spoken);
+    RUN_TEST(test_case_48_off_clears_spoken);
+    RUN_TEST(test_case_49_init_clears_spoken);
     run_settings_tests();
     exit(UNITY_END());
 }

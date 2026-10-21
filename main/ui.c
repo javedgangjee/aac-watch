@@ -20,6 +20,11 @@ static lv_obj_t *s_icon_yes;
 static lv_obj_t *s_icon_no;
 static lv_obj_t *s_half_yes;
 static lv_obj_t *s_half_no;
+static lv_obj_t *s_label_yes;
+static lv_obj_t *s_label_no;
+/* The view that ui_show or ui_show_split drew last. */
+static bool s_split;
+static screen_t s_shown;
 static ui_tap_cb_t s_on_tap;
 static ui_swipe_cb_t s_on_swipe_down;
 static int32_t s_press_y;
@@ -90,10 +95,10 @@ static lv_obj_t *make_label(lv_obj_t *parent, const lv_font_t *font)
 }
 
 /* Make one hidden half of the split screen at row y with the icon and the word on one line in its
- * center. Return the half and put its icon label in icon. The half does not take presses, so they
- * reach the screen. */
+ * center. Return the half, put its icon label in icon, and put its word label in label. The half
+ * does not take presses, so they reach the screen. */
 static lv_obj_t *make_half(int32_t y, int32_t height, uint32_t color, const char *symbol,
-                           const char *word, lv_obj_t **icon)
+                           const char *word, lv_obj_t **icon, lv_obj_t **label)
 {
     lv_obj_t *half = lv_obj_create(s_screen);
     lv_obj_remove_style_all(half);
@@ -109,8 +114,8 @@ static lv_obj_t *make_half(int32_t y, int32_t height, uint32_t color, const char
     lv_obj_t *box = make_box(half, LV_FLEX_FLOW_ROW, UI_ICON_GAP_SPLIT);
     *icon = make_label(box, &font_icons_80);
     lv_label_set_text_static(*icon, symbol);
-    lv_obj_t *label = make_label(box, &font_yes_no_160);
-    lv_label_set_text_static(label, word);
+    *label = make_label(box, &font_yes_no_160);
+    lv_label_set_text_static(*label, word);
     return half;
 }
 
@@ -132,9 +137,9 @@ void ui_init(ui_tap_cb_t on_tap, ui_swipe_cb_t on_swipe_down)
     s_label = make_label(s_box, &font_yes_no_160);
 
     int32_t half_h = (lv_display_get_vertical_resolution(NULL) - SCREEN_CYCLE_SPLIT_GAP) / 2;
-    s_half_yes = make_half(0, half_h, UI_COLOR_YES, LV_SYMBOL_OK, "Yes", &s_icon_yes);
+    s_half_yes = make_half(0, half_h, UI_COLOR_YES, LV_SYMBOL_OK, "Yes", &s_icon_yes, &s_label_yes);
     s_half_no = make_half(half_h + SCREEN_CYCLE_SPLIT_GAP, half_h, UI_COLOR_NO, LV_SYMBOL_CLOSE, "No",
-                          &s_icon_no);
+                          &s_icon_no, &s_label_no);
 }
 
 /* Show obj if show is true, and hide it if not. A hidden label takes no space in its box. */
@@ -154,18 +159,61 @@ void ui_set_icons(bool show)
     set_shown(s_icon_no, show);
 }
 
+static uint32_t word_color(screen_t word)
+{
+    return (word == SCREEN_YES) ? UI_COLOR_YES : UI_COLOR_NO;
+}
+
+/* Paint bg in color with white text, or paint bg white with text in color if swap is true. */
+static void paint(lv_obj_t *bg, lv_obj_t *icon, lv_obj_t *label, uint32_t color, bool swap)
+{
+    lv_color_t fill = swap ? lv_color_white() : lv_color_hex(color);
+    lv_color_t text = swap ? lv_color_hex(color) : lv_color_white();
+    lv_obj_set_style_bg_color(bg, fill, 0);
+    lv_obj_set_style_text_color(icon, text, 0);
+    lv_obj_set_style_text_color(label, text, 0);
+}
+
+/* Put the normal colors back on both halves of the split screen. */
+static void paint_halves(void)
+{
+    paint(s_half_yes, s_icon_yes, s_label_yes, UI_COLOR_YES, false);
+    paint(s_half_no, s_icon_no, s_label_no, UI_COLOR_NO, false);
+}
+
+void ui_set_swap(bool swap, screen_t word)
+{
+    if (!s_split) {
+        /* The cycle screen holds while its word plays, so the shown screen gives the color. */
+        paint(s_screen, s_icon, s_label, word_color(s_shown), swap);
+        return;
+    }
+
+    paint_halves();
+    if (swap) {
+        if (word == SCREEN_YES) {
+            paint(s_half_yes, s_icon_yes, s_label_yes, UI_COLOR_YES, true);
+        } else {
+            paint(s_half_no, s_icon_no, s_label_no, UI_COLOR_NO, true);
+        }
+    }
+}
+
 void ui_show(screen_t screen)
 {
+    s_split = false;
+    s_shown = screen;
+    paint_halves();
+    paint(s_screen, s_icon, s_label, word_color(screen), false);
+
     lv_obj_add_flag(s_half_yes, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(s_half_no, LV_OBJ_FLAG_HIDDEN);
     lv_obj_remove_flag(s_box, LV_OBJ_FLAG_HIDDEN);
 
     if (screen == SCREEN_YES) {
-        lv_obj_set_style_bg_color(s_screen, lv_color_hex(UI_COLOR_YES), 0);
         lv_label_set_text_static(s_icon, LV_SYMBOL_OK);
         lv_label_set_text_static(s_label, "Yes");
     } else {
-        lv_obj_set_style_bg_color(s_screen, lv_color_hex(UI_COLOR_NO), 0);
         lv_label_set_text_static(s_icon, LV_SYMBOL_CLOSE);
         lv_label_set_text_static(s_label, "No");
     }
@@ -173,8 +221,12 @@ void ui_show(screen_t screen)
 
 void ui_show_split(void)
 {
+    s_split = true;
+    paint_halves();
     /* The black screen behind the halves draws the band between them. */
     lv_obj_set_style_bg_color(s_screen, lv_color_black(), 0);
+    lv_obj_set_style_text_color(s_icon, lv_color_white(), 0);
+    lv_obj_set_style_text_color(s_label, lv_color_white(), 0);
     lv_obj_add_flag(s_box, LV_OBJ_FLAG_HIDDEN);
     lv_obj_remove_flag(s_half_yes, LV_OBJ_FLAG_HIDDEN);
     lv_obj_remove_flag(s_half_no, LV_OBJ_FLAG_HIDDEN);

@@ -26,6 +26,6 @@
    The goal is a check mark icon on the yes screen and an X icon on the no screen.
    This feature covers the two icons and a setting on the settings screen that shows or hides them. In cycle mode, the icon sits above the word, as in a typical AAC app. In split mode, the icon sits on the same line as the word.
 
-7. **Tap feedback.** Status is in progress.
+7. **Tap feedback.** Status is done.
    The goal is a screen that shows a tap was heard, with the colors of the tapped screen or half swapped while its word plays.
    This feature covers the swap of the background color and the text color on a tap that speaks, in cycle mode and in split mode. The colors go back when the word ends or stops. A tap on the dark screen wakes it and does not swap the colors.

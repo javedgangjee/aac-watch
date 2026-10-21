@@ -40,6 +40,10 @@ This file records the changes to aac-watch that a person who reads or runs the p
 - Feature 6 adds an Icons row with a Show button and a Hide button as the second row of the settings screen, and the default is Show.
 - Feature 6 saves the icons setting in NVS with the key `icons`, so a watch with saved settings from feature 5 shows the icons and keeps its other settings.
 - Feature 6 adds the Font Awesome source font and its license in `tools/fonts/`, and the README credits Font Awesome.
+- Feature 7 makes a tap that speaks turn the tapped screen white, with the word and the icon in green on the yes screen or red on the no screen, until the word ends.
+- Feature 7 swaps only the tapped half in split mode, and a tap on the other half while a word plays puts the first half back and swaps the new half.
+- Feature 7 puts the normal colors back when the word ends, when the screen turns off, or when the settings screen closes, and a tap on the dark screen does not swap the colors.
+- Feature 7 adds the functions `screen_cycle_tap_word` and `screen_cycle_spoken` to the `screen_cycle` component, and the host tests now number 69.
 
 ### Changed
 
@@ -56,6 +60,7 @@ This file records the changes to aac-watch that a person who reads or runs the p
 - Feature 6 makes a press that starts in the bottom 60 pixels of the settings screen leave the list still, so the swipe up closes the screen at any scroll position.
 - Feature 6 makes the rows below the cycle time row move up in split mode and keep their height, in place of the even spread from feature 5.
 - Feature 6 makes the README describe the icons setting and the scrolling settings screen, and the host tests now number 60.
+- Feature 7 makes the README say that the tapped screen or half shows white with the word in green or red while the word plays.
 
 ### Removed
 

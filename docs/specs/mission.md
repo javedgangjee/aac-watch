@@ -22,6 +22,8 @@ The watch gets a second mode, which is the split mode. The mode described above 
 
 The yes screen gets a check mark icon, and the no screen gets an X icon. A setting on the settings screen shows or hides the icons. In cycle mode, the icon sits above the word, as in a typical AAC app. In split mode, the icon sits on the same line as the word.
 
+When a tap speaks a word, the tapped screen or half swaps its background color and its text color while the word plays. The colors go back when the word ends.
+
 ## Hardware
 
 The app runs on the Waveshare ESP32-S3-Touch-AMOLED-2.06. This board has a 410 by 502 AMOLED touch screen, an ES8311 audio codec, and a speaker.

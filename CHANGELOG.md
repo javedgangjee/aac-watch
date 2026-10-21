@@ -34,6 +34,12 @@ This file records the changes to aac-watch that a person who reads or runs the p
 - Feature 5 adds a Mode row at the top of the settings screen with a Cycle button and a Split button, and the default is Cycle.
 - Feature 5 hides the cycle time row on the settings screen while Split is lit.
 - Feature 5 saves the mode in NVS with the key `mode`, so a watch with saved settings from feature 3 starts in cycle mode and keeps its other settings.
+- Feature 6 adds a white check mark icon to the yes screen and a white X icon to the no screen, made from the Font Awesome 5 font that ships with LVGL.
+- Feature 6 puts the icon 32 pixels above the word in cycle mode, and to the left of the word on the same line in split mode.
+- Feature 6 makes a tap on an icon act as a tap on its screen or its half.
+- Feature 6 adds an Icons row with a Show button and a Hide button as the second row of the settings screen, and the default is Show.
+- Feature 6 saves the icons setting in NVS with the key `icons`, so a watch with saved settings from feature 5 shows the icons and keeps its other settings.
+- Feature 6 adds the Font Awesome source font and its license in `tools/fonts/`, and the README credits Font Awesome.
 
 ### Changed
 
@@ -46,6 +52,10 @@ This file records the changes to aac-watch that a person who reads or runs the p
 - Feature 4 changes the settings namespace in NVS from `yes_no` to `aac_watch`, so a watch that already has saved settings goes back to the defaults one time.
 - Feature 5 makes every button on the settings screen 48 pixels high in place of 56, so the four rows and Done fit on the screen.
 - Feature 5 makes the README describe the two modes and the four settings, and the host tests now number 56.
+- Feature 6 makes the settings screen scroll up and down, with each row at a fixed height of 81 pixels and a thin grey line between rows, and the list starts at the top each time the screen opens.
+- Feature 6 makes a press that starts in the bottom 60 pixels of the settings screen leave the list still, so the swipe up closes the screen at any scroll position.
+- Feature 6 makes the rows below the cycle time row move up in split mode and keep their height, in place of the even spread from feature 5.
+- Feature 6 makes the README describe the icons setting and the scrolling settings screen, and the host tests now number 60.
 
 ### Removed
 

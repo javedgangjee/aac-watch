@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdbool.h>
 #include <stdint.h>
 #include "esp_err.h"
 #include "screen_cycle.h"
@@ -14,6 +15,9 @@ esp_err_t audio_init(uint8_t volume, audio_done_cb_t on_done);
 /* Play the clip for the given screen in the given voice. A play in progress stops and the new
  * clip starts from the start. Does not block. */
 void audio_play(screen_t screen, settings_voice_t voice);
+
+/* Return true if a play request waits for the playback task. */
+bool audio_pending(void);
 
 /* Set the speaker volume on the codec scale of 0 to 100. */
 esp_err_t audio_set_volume(uint8_t volume);

@@ -109,6 +109,11 @@ void audio_play(screen_t screen, settings_voice_t voice)
     xQueueOverwrite(s_queue, &req);
 }
 
+bool audio_pending(void)
+{
+    return uxQueueMessagesWaiting(s_queue) > 0;
+}
+
 esp_err_t audio_set_volume(uint8_t volume)
 {
     ESP_RETURN_ON_FALSE(esp_codec_dev_set_out_vol(s_codec, volume) == ESP_CODEC_DEV_OK,

@@ -167,10 +167,15 @@ static bool on_swipe_down(void)
 static void on_speak_done(void)
 {
     bsp_display_lock(0);
-    screen_cycle_speak_done(&s_cycle);
-    /* While the settings screen shows, the colors go back when it closes. */
-    if (!s_in_settings) {
-        apply_state();
+    /* A tap can queue a new clip while this task waits for the lock. That clip keeps the speaking
+     * state, and its own end ends it. The check is safe here because audio_play runs only with the
+     * lock held. */
+    if (!audio_pending()) {
+        screen_cycle_speak_done(&s_cycle);
+        /* While the settings screen shows, the colors go back when it closes. */
+        if (!s_in_settings) {
+            apply_state();
+        }
     }
     bsp_display_unlock();
 }

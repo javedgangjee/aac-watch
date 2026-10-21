@@ -9,7 +9,8 @@
 typedef void (*audio_done_cb_t)(void);
 
 /* Open the speaker codec at the given volume and start the playback task. on_done runs in the
- * playback task when a clip ends and no new request is waiting. */
+ * playback task when a clip ends and no new request is waiting. If this function fails, the other
+ * functions still work, and audio_play calls on_done at once in the task that calls it. */
 esp_err_t audio_init(uint8_t volume, audio_done_cb_t on_done);
 
 /* Play the clip for the given screen in the given voice. A play in progress stops and the new

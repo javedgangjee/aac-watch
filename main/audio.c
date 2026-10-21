@@ -31,6 +31,8 @@ typedef struct {
 static esp_codec_dev_handle_t s_codec;
 static QueueHandle_t s_queue;
 static audio_done_cb_t s_on_done;
+/* True after audio_init has opened the codec and started the playback task. */
+static bool s_ready;
 
 /* Set start and end to the clip for the request. */
 static void pick_clip(const audio_request_t *req, const uint8_t **start, const uint8_t **end)
@@ -100,22 +102,31 @@ esp_err_t audio_init(uint8_t volume, audio_done_cb_t on_done)
 
     ESP_RETURN_ON_FALSE(xTaskCreate(play_task, "audio", 4096, NULL, 5, NULL) == pdPASS,
                         ESP_ERR_NO_MEM, TAG, "Task create failed");
+    s_ready = true;
     return ESP_OK;
 }
 
 void audio_play(screen_t screen, settings_voice_t voice)
 {
+    if (!s_ready) {
+        /* With no sound, the word ends at once, so the screen does not hold forever. */
+        if (s_on_done) {
+            s_on_done();
+        }
+        return;
+    }
     audio_request_t req = { .screen = screen, .voice = voice };
     xQueueOverwrite(s_queue, &req);
 }
 
 bool audio_pending(void)
 {
-    return uxQueueMessagesWaiting(s_queue) > 0;
+    return s_ready && uxQueueMessagesWaiting(s_queue) > 0;
 }
 
 esp_err_t audio_set_volume(uint8_t volume)
 {
+    ESP_RETURN_ON_FALSE(s_codec, ESP_ERR_INVALID_STATE, TAG, "No speaker codec");
     ESP_RETURN_ON_FALSE(esp_codec_dev_set_out_vol(s_codec, volume) == ESP_CODEC_DEV_OK,
                         ESP_FAIL, TAG, "Set volume failed");
     return ESP_OK;

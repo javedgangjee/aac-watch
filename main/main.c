@@ -1,3 +1,4 @@
+#include "esp_log.h"
 #include "lvgl.h"
 #include "bsp/esp-bsp.h"
 #include "bsp/display.h"
@@ -7,6 +8,8 @@
 #include "audio.h"
 #include "ui.h"
 #include "ui_settings.h"
+
+static const char *TAG = "main";
 
 #define TICK_PERIOD_MS 50
 /* Time without a touch before the settings screen goes back by itself. */
@@ -163,7 +166,8 @@ static bool on_swipe_down(void)
     return true;
 }
 
-/* Runs in the playback task, so it takes the display lock. */
+/* Runs in the playback task, so it takes the display lock. If the audio did not start, it runs
+ * inside audio_play with the lock held, and the lock is recursive. */
 static void on_speak_done(void)
 {
     bsp_display_lock(0);
@@ -186,7 +190,12 @@ void app_main(void)
     s_saved = s_settings;
 
     bsp_display_start();
-    ESP_ERROR_CHECK(audio_init(s_settings.volume, on_speak_done));
+    /* The yes and no screens still work without sound, so a failed audio start does not restart
+     * the watch. */
+    esp_err_t err = audio_init(s_settings.volume, on_speak_done);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "The watch has no sound because the audio start failed: %s", esp_err_to_name(err));
+    }
 
     bsp_display_lock(0);
 

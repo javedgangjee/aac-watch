@@ -61,7 +61,9 @@ This file records the changes to aac-watch that a person who reads or runs the p
 - Feature 6 makes the rows below the cycle time row move up in split mode and keep their height, in place of the even spread from feature 5.
 - Feature 6 makes the README describe the icons setting and the scrolling settings screen, and the host tests now number 60.
 - Feature 7 makes the README say that the tapped screen or half shows white with the word in green or red while the word plays.
+- Split mode makes the word and the icon 25% smaller. The word font goes from size 160 to size 120, and the icon font goes from size 80 to size 60, in the new files `main/font_yes_no_120.c` and `main/font_icons_60.c`.
 
 ### Removed
 
 - Feature 4 removes `.vscode/settings.json` from git and adds `.vscode/` and `.ruff_cache/` to `.gitignore`.
+- Split mode removes `main/font_icons_80.c`, because no screen uses it now.

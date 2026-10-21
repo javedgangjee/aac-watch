@@ -4,7 +4,7 @@
 LV_FONT_DECLARE(font_yes_no_160);
 LV_FONT_DECLARE(font_icons_150);
 LV_FONT_DECLARE(font_yes_no_120);
-LV_FONT_DECLARE(font_icons_60);
+LV_FONT_DECLARE(font_icons_80);
 
 #define UI_COLOR_YES 0x007A29
 #define UI_COLOR_NO  0xC62828
@@ -113,7 +113,7 @@ static lv_obj_t *make_half(int32_t y, int32_t height, uint32_t color, const char
     /* The capitals fill the top 85 of the 86 rows of the word label, so the row centers the icon
      * on the capitals. */
     lv_obj_t *box = make_box(half, LV_FLEX_FLOW_ROW, UI_ICON_GAP_SPLIT);
-    *icon = make_label(box, &font_icons_60);
+    *icon = make_label(box, &font_icons_80);
     lv_label_set_text_static(*icon, symbol);
     *label = make_label(box, &font_yes_no_120);
     lv_label_set_text_static(*label, word);

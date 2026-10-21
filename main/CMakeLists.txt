@@ -1,7 +1,7 @@
 idf_component_register(
     SRCS main.c ui.c ui_settings.c audio.c settings_store.c
          font_yes_no_160.c font_yes_no_120.c font_settings_28.c font_settings_48.c
-         font_icons_150.c font_icons_60.c
+         font_icons_150.c font_icons_80.c
     INCLUDE_DIRS .)
 
 # The clips are made with the macOS say command on every clean build and are not checked in.
